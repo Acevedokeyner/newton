@@ -1,0 +1,2435 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>Isaac Newton — Las matemáticas que ayudaron a explicar el universo</title>
+<meta name="description" content="Un recorrido interactivo por las ideas matemáticas de Isaac Newton: del cambio al movimiento, de la fuerza al universo.">
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,340;0,9..144,480;0,9..144,600;1,9..144,340;1,9..144,480&family=Space+Grotesk:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.4/katex.min.css">
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollTrigger.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.4/katex.min.js"></script>
+
+<style>
+/* ============================================================
+   TOKENS
+   ============================================================ */
+:root{
+  --bg-void:#030405;
+  --bg-deep:#0a0c11;
+  --bg-panel:#0e1119;
+  --bg-panel-2:#12151e;
+  --ink:#eef1f6;
+  --ink-70:rgba(238,241,246,.72);
+  --ink-45:rgba(238,241,246,.46);
+  --ink-25:rgba(238,241,246,.24);
+  --brass:#c9a961;
+  --brass-soft:rgba(201,169,97,.5);
+  --brass-dim:rgba(201,169,97,.16);
+  --copper:#b5713f;
+  --chalk:#aebbd6;
+  --line:rgba(238,241,246,.1);
+  --line-strong:rgba(238,241,246,.2);
+  --danger:#c26a54;
+  --serif:'Fraunces',Georgia,serif;
+  --sans:'Space Grotesk',-apple-system,BlinkMacSystemFont,sans-serif;
+  --ease:cubic-bezier(.16,.8,.24,1);
+  --ease-soft:cubic-bezier(.4,0,.2,1);
+}
+
+/* ============================================================
+   RESET
+   ============================================================ */
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+html{
+  background:var(--bg-void);
+  scroll-behavior:auto;
+  -webkit-text-size-adjust:100%;
+}
+body{
+  background:var(--bg-void);
+  color:var(--ink);
+  font-family:var(--sans);
+  font-weight:400;
+  line-height:1.5;
+  overflow-x:hidden;
+  -webkit-font-smoothing:antialiased;
+  text-rendering:optimizeLegibility;
+}
+img,svg,canvas{display:block;max-width:100%;}
+button,input{font-family:inherit;color:inherit;}
+button{background:none;border:none;cursor:pointer;}
+a{color:inherit;}
+h1,h2,h3,h4{font-weight:400;}
+::selection{background:var(--brass-dim);color:var(--brass);}
+
+/* scrollbar */
+::-webkit-scrollbar{width:8px;}
+::-webkit-scrollbar-track{background:var(--bg-void);}
+::-webkit-scrollbar-thumb{background:var(--line-strong);border-radius:0;}
+
+/* ============================================================
+   TYPE SCALE
+   ============================================================ */
+.serif{font-family:var(--serif);}
+.eyebrow{
+  font-family:var(--sans);
+  font-size:.72rem;
+  letter-spacing:.16em;
+  text-transform:uppercase;
+  color:var(--brass);
+  font-weight:500;
+}
+.display-mega{
+  font-family:var(--serif);
+  font-weight:340;
+  font-size:clamp(3.4rem,13vw,11.5rem);
+  line-height:.92;
+  letter-spacing:-.01em;
+  color:var(--ink);
+}
+.display-1{
+  font-family:var(--serif);
+  font-weight:340;
+  font-size:clamp(2.4rem,6.4vw,5rem);
+  line-height:1.04;
+  letter-spacing:-.01em;
+}
+.display-2{
+  font-family:var(--serif);
+  font-weight:340;
+  font-size:clamp(1.7rem,3.6vw,2.9rem);
+  line-height:1.12;
+}
+.body-lg{
+  font-size:clamp(1.05rem,1.6vw,1.35rem);
+  line-height:1.6;
+  color:var(--ink-70);
+  max-width:36ch;
+  font-weight:300;
+}
+.body-md{
+  font-size:1rem;
+  line-height:1.65;
+  color:var(--ink-70);
+  max-width:38ch;
+  font-weight:300;
+}
+.mono-label{
+  font-family:var(--sans);
+  font-size:.78rem;
+  letter-spacing:.06em;
+  color:var(--ink-45);
+}
+
+/* ============================================================
+   LAYOUT PRIMITIVES
+   ============================================================ */
+.scene{
+  position:relative;
+  min-height:100vh;
+  width:100%;
+  display:flex;
+  align-items:center;
+  padding:clamp(24px,6vw,90px);
+  overflow:hidden;
+}
+.scene-inner{position:relative;z-index:3;width:100%;}
+.scene-canvas{position:absolute;inset:0;width:100%;height:100%;z-index:1;}
+.scene-veil{
+  position:absolute;inset:0;z-index:2;pointer-events:none;
+  background:linear-gradient(180deg,rgba(3,4,5,0) 0%,rgba(3,4,5,0) 70%,rgba(3,4,5,.55) 100%);
+}
+.scene-number{
+  position:absolute;
+  top:clamp(24px,5vw,56px);
+  right:clamp(24px,5vw,56px);
+  font-family:var(--sans);
+  font-size:.75rem;
+  letter-spacing:.08em;
+  color:var(--ink-25);
+  z-index:4;
+  display:flex;align-items:center;gap:8px;
+}
+.scene-number em{font-style:normal;color:var(--brass-soft);}
+hr.rule{
+  border:none;height:1px;
+  background:var(--line);
+  width:100%;
+}
+.hairline-v{width:1px;background:var(--line);align-self:stretch;}
+
+.container{max-width:1360px;margin:0 auto;width:100%;}
+
+.btn{
+  display:inline-flex;align-items:center;gap:.6em;
+  font-family:var(--sans);
+  font-size:.85rem;
+  letter-spacing:.1em;
+  text-transform:uppercase;
+  color:var(--ink);
+  padding:1.05em 1.9em;
+  border:1px solid var(--line-strong);
+  position:relative;
+  transition:border-color .5s var(--ease-soft),color .5s var(--ease-soft);
+}
+.btn::before{
+  content:'';position:absolute;inset:0;background:var(--brass);
+  transform:scaleX(0);transform-origin:left;
+  transition:transform .55s var(--ease);
+  z-index:-1;
+}
+.btn:hover{color:var(--bg-void);border-color:var(--brass);}
+.btn:hover::before{transform:scaleX(1);}
+.btn:focus-visible{outline:2px solid var(--brass);outline-offset:4px;}
+
+.link-quiet{
+  font-size:.85rem;letter-spacing:.05em;color:var(--ink-45);
+  border-bottom:1px solid var(--line-strong);padding-bottom:2px;
+  transition:color .3s,border-color .3s;
+}
+.link-quiet:hover{color:var(--brass);border-color:var(--brass);}
+
+/* visually-hidden but focusable skip link */
+.skip-link{
+  position:absolute;left:16px;top:-60px;
+  background:var(--brass);color:var(--bg-void);
+  padding:.7em 1.2em;font-size:.85rem;z-index:999;
+  transition:top .25s var(--ease-soft);
+}
+.skip-link:focus{top:16px;}
+
+.visually-hidden{
+  position:absolute!important;width:1px;height:1px;overflow:hidden;
+  clip:rect(0,0,0,0);white-space:nowrap;
+}
+
+/* ============================================================
+   CUSTOM CURSOR (desktop, fine pointer only)
+   ============================================================ */
+.uses-custom-cursor, .uses-custom-cursor *{cursor:none!important;}
+#cursor-ring,#cursor-dot{
+  position:fixed;top:0;left:0;pointer-events:none;z-index:9999;
+  border-radius:50%;
+  transform:translate(-50%,-50%);
+  will-change:transform;
+}
+#cursor-dot{
+  width:6px;height:6px;background:var(--brass);
+}
+#cursor-ring{
+  width:34px;height:34px;border:1px solid var(--ink-45);
+  transition:width .25s var(--ease-soft),height .25s var(--ease-soft),
+             border-color .25s var(--ease-soft),background-color .25s var(--ease-soft);
+}
+#cursor-ring.is-active{
+  width:56px;height:56px;border-color:var(--brass);background:rgba(201,169,97,.08);
+}
+#cursor-ring.is-drag{width:22px;height:22px;background:var(--brass);border-color:var(--brass);}
+
+/* ============================================================
+   LOADING SCREEN
+   ============================================================ */
+#loading-screen{
+  position:fixed;inset:0;z-index:1000;
+  background:var(--bg-void);
+  display:flex;align-items:center;justify-content:center;
+  flex-direction:column;gap:22px;
+}
+#loading-mark{
+  width:46px;height:46px;position:relative;
+}
+#loading-mark svg{width:100%;height:100%;}
+#loading-mark circle{
+  fill:none;stroke:var(--brass);stroke-width:1;
+  stroke-dasharray:125.7;stroke-dashoffset:125.7;
+}
+#loading-text{
+  font-family:var(--sans);font-size:.78rem;letter-spacing:.22em;
+  text-transform:uppercase;color:var(--ink-45);
+  min-height:1.2em;
+}
+#loading-bar{
+  width:180px;height:1px;background:var(--line);position:relative;overflow:hidden;
+}
+#loading-bar span{
+  position:absolute;left:0;top:0;bottom:0;width:0%;background:var(--brass);
+}
+
+/* ============================================================
+   NAVIGATION
+   ============================================================ */
+#scene-nav{
+  position:fixed;
+  right:clamp(14px,3vw,34px);
+  top:50%;
+  transform:translateY(-50%);
+  z-index:500;
+  display:flex;flex-direction:column;align-items:flex-end;gap:14px;
+  opacity:0;
+  transition:opacity .6s var(--ease-soft);
+}
+#scene-nav.is-visible{opacity:1;}
+.nav-item{
+  display:flex;align-items:center;gap:10px;
+  font-family:var(--sans);font-size:.68rem;letter-spacing:.1em;
+  color:var(--ink-25);
+  padding:4px 0;
+}
+.nav-item .nav-label{
+  opacity:0;transform:translateX(6px);
+  transition:opacity .3s var(--ease-soft),transform .3s var(--ease-soft);
+  white-space:nowrap;
+  text-transform:uppercase;
+}
+.nav-item:hover .nav-label,.nav-item:focus-visible .nav-label{opacity:1;transform:translateX(0);}
+.nav-dot{
+  width:6px;height:6px;border-radius:50%;
+  background:var(--ink-25);
+  transition:background .3s,transform .3s;
+  flex-shrink:0;
+}
+.nav-item.is-active .nav-dot{background:var(--brass);transform:scale(1.6);}
+.nav-item.is-active{color:var(--ink-70);}
+#nav-progress{
+  margin-top:8px;font-family:var(--sans);font-size:.7rem;color:var(--ink-25);
+  letter-spacing:.05em;
+}
+#nav-progress em{font-style:normal;color:var(--brass-soft);}
+
+@media (max-width:860px){
+  #scene-nav{
+    top:auto;bottom:0;right:0;left:0;transform:none;
+    flex-direction:row;justify-content:center;align-items:center;
+    gap:10px;padding:14px 0;
+    background:linear-gradient(0deg,rgba(3,4,5,.9),transparent);
+  }
+  .nav-item .nav-label{display:none;}
+  #nav-progress{display:none;}
+}
+
+/* ============================================================
+   HERO
+   ============================================================ */
+#scene-hero{
+  min-height:100svh;
+  flex-direction:column;
+  align-items:flex-start;justify-content:flex-end;
+  padding-bottom:clamp(40px,7vh,80px);
+  background:radial-gradient(ellipse 90% 60% at 50% 20%,#0b0e15 0%,var(--bg-void) 70%);
+}
+.hero-content{position:relative;z-index:3;width:100%;}
+.hero-kicker{
+  font-family:var(--sans);font-size:.78rem;letter-spacing:.2em;
+  color:var(--brass);text-transform:uppercase;margin-bottom:18px;
+  opacity:0;
+}
+#hero-name{
+  color:var(--ink);
+  opacity:0;
+}
+.hero-tagline{
+  margin-top:22px;
+  font-family:var(--serif);font-style:italic;font-weight:340;
+  font-size:clamp(1.1rem,2.1vw,1.6rem);
+  color:var(--ink-70);
+  max-width:26ch;
+  opacity:0;
+}
+.hero-meta{
+  margin-top:44px;
+  display:flex;align-items:center;gap:28px;flex-wrap:wrap;
+  opacity:0;
+}
+.hero-dates{font-family:var(--sans);font-size:.9rem;letter-spacing:.08em;color:var(--ink-45);}
+.hero-scroll-hint{
+  display:flex;align-items:center;gap:10px;
+  font-size:.72rem;letter-spacing:.14em;text-transform:uppercase;color:var(--ink-45);
+}
+.hero-scroll-hint .arrow{display:inline-block;animation:bob 2.2s ease-in-out infinite;}
+@keyframes bob{0%,100%{transform:translateY(0);}50%{transform:translateY(6px);}}
+.hero-cta{margin-top:6px;opacity:0;}
+
+.formula-float{
+  position:absolute;font-family:var(--sans);font-size:.85rem;color:var(--ink-25);
+  z-index:2;letter-spacing:.02em;
+  opacity:0;
+}
+
+/* ============================================================
+   GENERIC SPLIT SCENE (text + visual)
+   ============================================================ */
+.split{
+  display:grid;
+  grid-template-columns:minmax(0,.95fr) minmax(0,1.05fr);
+  gap:clamp(30px,6vw,90px);
+  align-items:center;
+  width:100%;
+}
+.split.reverse{grid-template-columns:minmax(0,1.05fr) minmax(0,.95fr);}
+.split.reverse .split-visual{order:2;}
+.split.reverse .split-text{order:1;}
+.split-visual{
+  position:relative;
+  aspect-ratio:1/1;
+  width:100%;
+  border:1px solid var(--line);
+  background:var(--bg-panel);
+}
+.split-text .eyebrow{margin-bottom:20px;}
+.split-text h2{margin-bottom:22px;}
+@media (max-width:900px){
+  .split,.split.reverse{grid-template-columns:1fr;}
+  .split.reverse .split-visual{order:1;}
+  .split.reverse .split-text{order:2;}
+  .split-visual{aspect-ratio:4/3;}
+}
+
+/* ============================================================
+   WHO WAS NEWTON
+   ============================================================ */
+#scene-who{background:var(--bg-void);}
+.who-words{
+  display:flex;flex-wrap:wrap;gap:14px 34px;margin-top:34px;
+}
+.who-words span{
+  font-family:var(--serif);font-style:italic;font-weight:340;
+  font-size:clamp(1.3rem,2.6vw,2rem);color:var(--ink-25);
+  transition:color .5s var(--ease-soft);
+}
+.who-words span.is-lit{color:var(--brass);}
+.who-year{
+  font-family:var(--serif);font-size:clamp(4rem,10vw,7.5rem);color:var(--ink-25);
+  line-height:1;margin-bottom:8px;
+}
+
+/* ============================================================
+   TIMELINE
+   ============================================================ */
+#scene-timeline{flex-direction:column;align-items:stretch;justify-content:center;gap:60px;}
+.timeline-track{
+  position:relative;width:100%;padding:0 clamp(0px,2vw,10px);
+}
+.timeline-line{
+  position:relative;height:1px;background:var(--line-strong);width:100%;margin:0 0 0 0;
+}
+.timeline-fill{
+  position:absolute;left:0;top:0;height:100%;width:0%;background:var(--brass);
+}
+.timeline-points{
+  display:flex;justify-content:space-between;margin-top:-1px;
+}
+.timeline-point{
+  position:relative;text-align:left;flex:1;padding-top:22px;cursor:pointer;
+  background:none;border:none;
+}
+.timeline-point::before{
+  content:'';position:absolute;top:-4px;left:0;width:9px;height:9px;border-radius:50%;
+  background:var(--bg-void);border:1px solid var(--ink-25);
+  transition:background .35s,border-color .35s,transform .35s;
+}
+.timeline-point.is-active::before{background:var(--brass);border-color:var(--brass);transform:scale(1.3);}
+.timeline-year{font-family:var(--sans);font-size:.85rem;color:var(--ink-45);letter-spacing:.05em;}
+.timeline-point.is-active .timeline-year{color:var(--brass);}
+.timeline-detail{
+  min-height:120px;display:flex;flex-direction:column;justify-content:center;gap:14px;
+  max-width:640px;
+}
+.timeline-detail-year{font-family:var(--serif);font-size:clamp(2.4rem,5vw,3.6rem);color:var(--ink);}
+.timeline-detail-text{color:var(--ink-70);font-size:1.05rem;font-weight:300;max-width:52ch;}
+@media (max-width:760px){
+  .timeline-points{flex-wrap:wrap;gap:16px 0;}
+  .timeline-point{flex:0 0 33%;}
+}
+
+/* ============================================================
+   CHANGE / CALCULUS INTRO
+   ============================================================ */
+#scene-change .split-visual{background:var(--bg-void);border-color:var(--line);}
+.big-question{
+  font-family:var(--serif);font-style:italic;font-weight:340;
+  font-size:clamp(1.8rem,4vw,3rem);line-height:1.2;color:var(--ink);
+  max-width:16ch;
+}
+#scene-calculus-intro{flex-direction:column;gap:70px;}
+.paths{
+  display:grid;grid-template-columns:1fr 1px 1fr;gap:0;width:100%;max-width:1000px;margin:0 auto;
+}
+.path-card{padding:clamp(20px,3vw,40px);text-align:center;}
+.path-card h3{font-family:var(--serif);font-weight:340;font-size:clamp(1.6rem,3vw,2.3rem);margin-bottom:14px;}
+.path-card p{color:var(--ink-45);font-size:.95rem;max-width:26ch;margin:0 auto;}
+.path-glyph{
+  font-family:var(--serif);font-size:3rem;color:var(--brass-soft);margin-bottom:18px;
+}
+
+/* ============================================================
+   DERIVATIVE / INTEGRAL INTERACTIVE
+   ============================================================ */
+.viz-panel{
+  border:1px solid var(--line);
+  background:var(--bg-panel);
+  position:relative;
+  aspect-ratio:4/3;
+  width:100%;
+}
+.viz-panel canvas{width:100%;height:100%;display:block;touch-action:none;}
+.viz-readout{
+  display:flex;gap:32px;margin-top:26px;flex-wrap:wrap;
+}
+.readout-item{display:flex;flex-direction:column;gap:6px;}
+.readout-label{font-size:.7rem;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-25);}
+.readout-value{font-family:var(--serif);font-size:1.6rem;color:var(--brass);min-height:1.3em;}
+.readout-value .katex{color:var(--brass);font-size:1em;}
+.viz-hint{margin-top:18px;font-size:.82rem;color:var(--ink-25);}
+
+.slider-row{display:flex;align-items:center;gap:16px;margin-top:24px;}
+.slider-row label{font-size:.78rem;letter-spacing:.06em;color:var(--ink-45);min-width:11ch;}
+input[type=range]{
+  -webkit-appearance:none;appearance:none;
+  width:100%;height:1px;background:var(--line-strong);
+  outline:none;
+}
+input[type=range]::-webkit-slider-thumb{
+  -webkit-appearance:none;appearance:none;
+  width:14px;height:14px;border-radius:50%;
+  background:var(--brass);cursor:pointer;
+  border:2px solid var(--bg-void);
+  box-shadow:0 0 0 1px var(--brass);
+  transition:transform .2s;
+}
+input[type=range]::-webkit-slider-thumb:hover{transform:scale(1.15);}
+input[type=range]::-moz-range-thumb{
+  width:14px;height:14px;border-radius:50%;background:var(--brass);
+  border:2px solid var(--bg-void);box-shadow:0 0 0 1px var(--brass);cursor:pointer;
+}
+input[type=range]:focus-visible::-webkit-slider-thumb{outline:2px solid var(--chalk);outline-offset:2px;}
+
+.rect-buttons{display:flex;gap:8px;flex-wrap:wrap;margin-top:22px;}
+.rect-buttons button{
+  font-size:.78rem;letter-spacing:.04em;color:var(--ink-45);
+  border:1px solid var(--line-strong);padding:.5em 1em;
+  transition:color .25s,border-color .25s,background .25s;
+}
+.rect-buttons button.is-active,.rect-buttons button:hover{
+  color:var(--bg-void);background:var(--brass);border-color:var(--brass);
+}
+.rect-buttons button:focus-visible{outline:2px solid var(--chalk);outline-offset:2px;}
+
+/* ============================================================
+   CONNECTION
+   ============================================================ */
+#scene-connection{flex-direction:column;text-align:center;gap:26px;}
+.connect-chain{display:flex;flex-direction:column;align-items:center;gap:10px;}
+.connect-chain .display-2{color:var(--ink-45);}
+.connect-chain .display-2.is-final{color:var(--brass);}
+.connect-arrow{color:var(--ink-25);font-size:1.4rem;}
+
+/* ============================================================
+   SERIES
+   ============================================================ */
+#scene-series{flex-direction:column;gap:40px;text-align:center;align-items:center;}
+.series-terms{
+  display:flex;flex-wrap:wrap;justify-content:center;gap:10px 6px;
+  font-family:var(--serif);font-size:clamp(1.1rem,2.2vw,1.6rem);color:var(--ink-25);
+  max-width:800px;
+}
+.series-terms .term{opacity:0;}
+.series-bar{width:min(560px,86vw);height:2px;background:var(--line);position:relative;margin-top:10px;}
+.series-bar-fill{position:absolute;left:0;top:0;height:100%;width:0%;background:var(--brass);}
+.series-limit{font-size:.85rem;color:var(--ink-45);}
+
+/* ============================================================
+   MOVEMENT
+   ============================================================ */
+.pva-readout{display:flex;gap:40px;margin-top:30px;flex-wrap:wrap;}
+
+/* ============================================================
+   F = MA
+   ============================================================ */
+.sim-controls{margin-top:10px;}
+.track-wrap{position:relative;height:64px;margin-top:36px;}
+
+/* ============================================================
+   GRAVITY / UNIVERSE
+   ============================================================ */
+#scene-gravity .viz-panel,#scene-universe .scene-canvas{background:var(--bg-void);}
+#scene-universe{min-height:120vh;}
+.universe-headline{
+  position:relative;z-index:3;text-align:center;max-width:22ch;margin:0 auto;
+}
+
+/* ============================================================
+   MANUSCRIPT
+   ============================================================ */
+#scene-manuscript{background:#0b0906;}
+.manuscript-sheet{
+  position:relative;
+  background:
+    radial-gradient(ellipse 120% 80% at 30% 0%, rgba(181,113,63,.10), transparent 60%),
+    #100c08;
+  border:1px solid rgba(181,113,63,.25);
+  padding:clamp(28px,5vw,64px);
+  aspect-ratio:3/4;
+}
+.manuscript-sheet svg{width:100%;height:100%;opacity:.85;}
+.manuscript-caption{margin-top:20px;font-size:.82rem;color:rgba(238,241,246,.4);max-width:42ch;}
+.paper-to-code{
+  margin-top:40px;display:flex;align-items:center;gap:16px;
+  font-family:var(--sans);font-size:.75rem;letter-spacing:.14em;text-transform:uppercase;color:var(--ink-45);
+}
+
+/* ============================================================
+   CURIOSITIES
+   ============================================================ */
+#scene-curiosities{flex-direction:column;align-items:stretch;gap:0;}
+.fact-list{border-top:1px solid var(--line);width:100%;}
+.fact{
+  border-bottom:1px solid var(--line);
+  padding:clamp(22px,3vw,34px) 0;
+  cursor:pointer;
+}
+.fact-head{display:flex;justify-content:space-between;align-items:baseline;gap:20px;}
+.fact-num{font-family:var(--sans);font-size:.8rem;color:var(--brass-soft);}
+.fact-title{font-family:var(--serif);font-size:clamp(1.15rem,2.2vw,1.6rem);flex:1;}
+.fact-toggle{font-size:1.2rem;color:var(--ink-25);transition:transform .35s var(--ease-soft);}
+.fact.is-open .fact-toggle{transform:rotate(45deg);}
+.fact-body{
+  max-height:0;overflow:hidden;
+  transition:max-height .45s var(--ease-soft);
+}
+.fact-body p{padding-top:16px;color:var(--ink-45);max-width:60ch;font-weight:300;}
+
+/* ============================================================
+   CONCLUSION
+   ============================================================ */
+#scene-conclusion{flex-direction:column;align-items:center;text-align:center;gap:26px;min-height:110vh;}
+.conclusion-words{display:flex;gap:26px;flex-wrap:wrap;justify-content:center;margin-top:8px;}
+.conclusion-words span{
+  font-size:.8rem;letter-spacing:.16em;text-transform:uppercase;color:var(--ink-45);
+}
+.conclusion-final{max-width:44ch;color:var(--ink-70);font-weight:300;font-size:clamp(1.05rem,1.8vw,1.3rem);margin-top:20px;}
+
+/* ============================================================
+   FOCUS / ACCESSIBILITY
+   ============================================================ */
+a:focus-visible,button:focus-visible,[tabindex]:focus-visible{
+  outline:2px solid var(--brass);outline-offset:4px;
+}
+.timeline-point:focus-visible::before{outline:2px solid var(--chalk);outline-offset:3px;}
+
+/* ============================================================
+   RESPONSIVE
+   ============================================================ */
+@media (max-width:760px){
+  .formula-float{display:none;}
+  .scene{padding:24px 20px;min-height:100svh;}
+  .scene-number{top:18px;right:20px;}
+  .viz-readout{gap:20px;}
+  .paths{grid-template-columns:1fr;}
+  .paths .hairline-v{display:none;}
+  .path-card{border-top:1px solid var(--line);padding:28px 0;}
+  .path-card:first-child{border-top:none;}
+}
+
+/* ============================================================
+   REDUCED MOTION
+   ============================================================ */
+@media (prefers-reduced-motion:reduce){
+  *{animation-duration:.001ms!important;animation-iteration-count:1!important;transition-duration:.001ms!important;}
+  .hero-scroll-hint .arrow{animation:none;}
+}
+body.reduced-motion .reveal-el{opacity:1!important;transform:none!important;}
+
+/* ============================================================
+   REVEAL DEFAULTS (set by JS/GSAP from-state; ensures no-JS fallback shows content)
+   ============================================================ */
+.reveal-el{opacity:1;}
+html.js .reveal-el{opacity:0;}
+noscript{
+  display:block;position:fixed;inset:0;z-index:99999;background:var(--bg-void);color:var(--ink);
+  padding:40px;font-family:var(--sans);
+}
+</style>
+</head>
+<body>
+<a class="skip-link" href="#main-content">Saltar al contenido</a>
+
+<div id="cursor-ring" aria-hidden="true"></div>
+<div id="cursor-dot" aria-hidden="true"></div>
+
+<div id="loading-screen" role="status" aria-live="polite">
+  <div id="loading-mark">
+    <svg viewBox="0 0 46 46"><circle cx="23" cy="23" r="20"></circle></svg>
+  </div>
+  <div id="loading-text">CALCULANDO...</div>
+  <div id="loading-bar"><span></span></div>
+</div>
+
+<nav id="scene-nav" aria-label="Navegación de escenas">
+  <button class="nav-item" data-target="scene-hero"><span class="nav-label">Intro</span><span class="nav-dot"></span></button>
+  <button class="nav-item" data-target="scene-who"><span class="nav-label">Newton</span><span class="nav-dot"></span></button>
+  <button class="nav-item" data-target="scene-calculus-intro"><span class="nav-label">Cálculo</span><span class="nav-dot"></span></button>
+  <button class="nav-item" data-target="scene-derivative"><span class="nav-label">Derivadas</span><span class="nav-dot"></span></button>
+  <button class="nav-item" data-target="scene-integral"><span class="nav-label">Integrales</span><span class="nav-dot"></span></button>
+  <button class="nav-item" data-target="scene-movement"><span class="nav-label">Movimiento</span><span class="nav-dot"></span></button>
+  <button class="nav-item" data-target="scene-gravity"><span class="nav-label">Gravedad</span><span class="nav-dot"></span></button>
+  <button class="nav-item" data-target="scene-manuscript"><span class="nav-label">Legado</span><span class="nav-dot"></span></button>
+  <div id="nav-progress"><em id="nav-progress-current">01</em>/08</div>
+</nav>
+
+<main id="main-content">
+
+  <!-- ============================================================
+       00 — HERO / ENTRADA
+       ============================================================ -->
+  <section id="scene-hero" class="scene" aria-label="Introducción">
+    <canvas id="hero-canvas" class="scene-canvas" aria-hidden="true"></canvas>
+    <div class="scene-veil" aria-hidden="true"></div>
+    <span class="scene-number">01 — INTRO</span>
+
+    <div class="formula-float" id="hero-formula-1" style="top:16%;left:8%;" aria-hidden="true"></div>
+    <div class="formula-float" id="hero-formula-2" style="top:24%;right:10%;" aria-hidden="true"></div>
+    <div class="formula-float" id="hero-formula-3" style="bottom:30%;right:16%;" aria-hidden="true"></div>
+
+    <div class="hero-content">
+      <p class="hero-kicker reveal-el">ISAAC</p>
+      <h1 id="hero-name" class="display-mega reveal-el">NEWTON</h1>
+      <p class="hero-tagline reveal-el">Las matemáticas que ayudaron a explicar el universo.</p>
+      <div class="hero-meta reveal-el">
+        <span class="hero-dates">1643 — 1727</span>
+        <span class="hero-scroll-hint"><span>Desplázate para explorar</span><span class="arrow" aria-hidden="true">↓</span></span>
+      </div>
+      <div class="hero-cta reveal-el">
+        <button class="btn" id="enter-experience-btn">Entrar en la experiencia</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============================================================
+       01 — QUIÉN FUE ISAAC NEWTON
+       ============================================================ -->
+  <section id="scene-who" class="scene" aria-label="¿Quién fue Isaac Newton?">
+    <span class="scene-number">02 — NEWTON</span>
+    <div class="scene-inner split">
+      <div class="split-text">
+        <p class="who-year reveal-el">1643</p>
+        <p class="eyebrow reveal-el">Woolsthorpe, Inglaterra</p>
+        <h2 class="display-1 reveal-el">Isaac Newton</h2>
+        <p class="body-lg reveal-el" style="margin-top:20px;">
+          Newton fue un matemático, físico y astrónomo inglés cuyo trabajo cambió la forma
+          en que entendemos el cambio, el movimiento y las fuerzas que gobiernan el universo.
+        </p>
+        <div class="who-words" id="who-words">
+          <span data-word>Matemáticas</span>
+          <span data-word>Física</span>
+          <span data-word>Astronomía</span>
+          <span data-word>Óptica</span>
+        </div>
+      </div>
+      <div class="split-visual">
+        <canvas id="who-canvas" class="scene-canvas" style="position:absolute;"></canvas>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============================================================
+       02 — TIMELINE
+       ============================================================ -->
+  <section id="scene-timeline" class="scene" aria-label="Cronología">
+    <div class="scene-inner" style="display:flex;flex-direction:column;gap:56px;">
+      <div>
+        <p class="eyebrow reveal-el">Cronología</p>
+        <h2 class="display-1 reveal-el" style="margin-top:16px;">Una vida en cinco momentos</h2>
+      </div>
+
+      <div class="timeline-detail" id="timeline-detail" aria-live="polite">
+        <p class="timeline-detail-year">1643</p>
+        <p class="timeline-detail-text">Nace en Woolsthorpe, Inglaterra.</p>
+      </div>
+
+      <div class="timeline-track">
+        <div class="timeline-line"><div class="timeline-fill" id="timeline-fill"></div></div>
+        <div class="timeline-points" id="timeline-points" role="tablist" aria-label="Eventos de la cronología">
+          <button class="timeline-point is-active" data-year="1643" data-text="Nace en Woolsthorpe, Inglaterra." role="tab" aria-selected="true">
+            <span class="timeline-year">1643</span>
+          </button>
+          <button class="timeline-point" data-year="Década de 1660" data-text="Desarrolla ideas matemáticas centrales para lo que hoy conocemos como cálculo, incluyendo su método de fluxiones." role="tab" aria-selected="false">
+            <span class="timeline-year">1660s</span>
+          </button>
+          <button class="timeline-point" data-year="1687" data-text="Publica Philosophiæ Naturalis Principia Mathematica, donde formula las leyes del movimiento y la gravitación universal." role="tab" aria-selected="false">
+            <span class="timeline-year">1687</span>
+          </button>
+          <button class="timeline-point" data-year="1704" data-text="Publica Opticks, su estudio sobre la naturaleza de la luz y el color." role="tab" aria-selected="false">
+            <span class="timeline-year">1704</span>
+          </button>
+          <button class="timeline-point" data-year="1727" data-text="Muere en Londres, dejando un cuerpo de trabajo que redefinió la ciencia moderna." role="tab" aria-selected="false">
+            <span class="timeline-year">1727</span>
+          </button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============================================================
+       03 — EL PROBLEMA DEL CAMBIO
+       ============================================================ -->
+  <section id="scene-change" class="scene" aria-label="El problema del cambio">
+    <div class="scene-inner split reverse">
+      <div class="split-text">
+        <p class="eyebrow reveal-el">El problema del cambio</p>
+        <p class="big-question reveal-el" style="margin-top:20px;">¿Cómo describimos algo que está cambiando?</p>
+        <p class="body-lg reveal-el" style="margin-top:24px;">
+          La posición de esta pelota cambia todo el tiempo. También cambia su velocidad.
+          Newton buscaba herramientas matemáticas capaces de describir ese cambio con precisión.
+        </p>
+      </div>
+      <div class="split-visual">
+        <canvas id="change-canvas" class="scene-canvas" style="position:absolute;"></canvas>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============================================================
+       04 — EL CÁLCULO (intro)
+       ============================================================ -->
+  <section id="scene-calculus-intro" class="scene" aria-label="El cálculo">
+    <span class="scene-number">03 — CÁLCULO</span>
+    <div class="scene-inner" style="text-align:center;">
+      <p class="eyebrow reveal-el">Dos caminos</p>
+      <h2 class="display-1 reveal-el" style="margin-top:16px;">El cálculo</h2>
+      <p class="body-lg reveal-el" style="margin:22px auto 0;">
+        El cálculo permite estudiar cantidades que cambian y cantidades que se acumulan.
+      </p>
+      <div class="paths" style="margin-top:60px;">
+        <div class="path-card reveal-el">
+          <div class="path-glyph" aria-hidden="true">f&prime;</div>
+          <h3>Derivadas</h3>
+          <p>Miden el cambio.</p>
+        </div>
+        <div class="hairline-v" aria-hidden="true"></div>
+        <div class="path-card reveal-el">
+          <div class="path-glyph" aria-hidden="true">&int;</div>
+          <h3>Integrales</h3>
+          <p>Miden la acumulación.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============================================================
+       05 — DERIVADAS INTERACTIVAS
+       ============================================================ -->
+  <section id="scene-derivative" class="scene" aria-label="Derivadas interactivas">
+    <span class="scene-number">04 — DERIVADAS</span>
+    <div class="scene-inner split">
+      <div class="split-text">
+        <p class="eyebrow reveal-el">La derivada</p>
+        <h2 class="display-1 reveal-el" style="margin-top:16px;">¿Qué tan rápido cambia?</h2>
+        <p class="body-lg reveal-el" style="margin-top:20px;">
+          Mueve el punto sobre la curva <span id="derivative-fx-label">f(x) = x²</span>.
+          La recta muestra la pendiente exacta en ese punto: la derivada.
+        </p>
+        <div class="viz-readout reveal-el">
+          <div class="readout-item">
+            <span class="readout-label">x</span>
+            <span class="readout-value" id="derivative-x-value">0.00</span>
+          </div>
+          <div class="readout-item">
+            <span class="readout-label">f(x)</span>
+            <span class="readout-value" id="derivative-fx-value">0.00</span>
+          </div>
+          <div class="readout-item">
+            <span class="readout-label">f&prime;(x)</span>
+            <span class="readout-value" id="derivative-slope-value">0.00</span>
+          </div>
+        </div>
+        <p class="viz-hint reveal-el">La derivada mide cómo cambia una función en cada punto.</p>
+        <p class="mono-label reveal-el" id="derivative-general-formula" style="margin-top:10px;"></p>
+      </div>
+      <div class="split-visual viz-panel" id="derivative-panel">
+        <canvas id="derivative-canvas" tabindex="0" role="img" aria-label="Gráfica interactiva de f(x)=x². Usa las flechas izquierda y derecha, o arrastra, para mover el punto sobre la curva."></canvas>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============================================================
+       06 — INTEGRALES INTERACTIVAS
+       ============================================================ -->
+  <section id="scene-integral" class="scene" aria-label="Integrales interactivas">
+    <span class="scene-number">05 — INTEGRALES</span>
+    <div class="scene-inner split reverse">
+      <div class="split-visual viz-panel" id="integral-panel">
+        <canvas id="integral-canvas"></canvas>
+      </div>
+      <div class="split-text">
+        <p class="eyebrow reveal-el">La integral</p>
+        <h2 class="display-1 reveal-el" style="margin-top:16px;">¿Cuánta área se acumula?</h2>
+        <p class="body-lg reveal-el" style="margin-top:20px;">
+          Más rectángulos, mejor aproximación. Elige cuántos usar para estimar el área bajo la curva.
+        </p>
+        <div class="rect-buttons reveal-el" id="rect-buttons" role="group" aria-label="Número de rectángulos">
+          <button data-n="0">0</button>
+          <button data-n="5">5</button>
+          <button data-n="10" class="is-active">10</button>
+          <button data-n="25">25</button>
+          <button data-n="50">50</button>
+          <button data-n="100">100</button>
+        </div>
+        <div class="viz-readout reveal-el">
+          <div class="readout-item">
+            <span class="readout-label">Rectángulos</span>
+            <span class="readout-value" id="integral-n-value">10</span>
+          </div>
+          <div class="readout-item">
+            <span class="readout-label">Área aproximada</span>
+            <span class="readout-value" id="integral-area-value">0.00</span>
+          </div>
+        </div>
+        <p class="viz-hint reveal-el">Más divisiones significan una mejor aproximación del área real.</p>
+        <p class="mono-label reveal-el" id="integral-formula" style="margin-top:10px;"></p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============================================================
+       07 — CONEXIÓN
+       ============================================================ -->
+  <section id="scene-connection" class="scene" aria-label="La conexión entre derivadas e integrales">
+    <div class="scene-inner">
+      <div class="connect-chain">
+        <p class="display-2 reveal-el" id="connect-1">CAMBIO</p>
+        <span class="connect-arrow reveal-el" aria-hidden="true">↓</span>
+        <p class="display-2 reveal-el" id="connect-2">ACUMULACIÓN</p>
+        <span class="connect-arrow reveal-el" aria-hidden="true">↓</span>
+        <p class="display-2 is-final reveal-el" id="connect-3">CÁLCULO</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============================================================
+       08 — SERIES INFINITAS
+       ============================================================ -->
+  <section id="scene-series" class="scene" aria-label="Series infinitas">
+    <div class="scene-inner" style="display:flex;flex-direction:column;align-items:center;gap:36px;">
+      <p class="eyebrow reveal-el">Sumas infinitas</p>
+      <div class="series-terms" id="series-terms" aria-hidden="true"></div>
+      <div class="series-bar"><div class="series-bar-fill" id="series-bar-fill"></div></div>
+      <p class="series-limit reveal-el" id="series-limit-text">Una suma infinita puede acercarse cada vez más a un valor fijo.</p>
+    </div>
+  </section>
+
+  <!-- ============================================================
+       09 — NEWTON Y EL MOVIMIENTO
+       ============================================================ -->
+  <section id="scene-movement" class="scene" aria-label="Newton y el movimiento">
+    <span class="scene-number">06 — MOVIMIENTO</span>
+    <div class="scene-inner split reverse">
+      <div class="split-visual">
+        <canvas id="movement-canvas" class="scene-canvas" style="position:absolute;"></canvas>
+      </div>
+      <div class="split-text">
+        <p class="eyebrow reveal-el">Del cálculo a la física</p>
+        <h2 class="display-1 reveal-el" style="margin-top:16px;">Posición, velocidad, aceleración</h2>
+        <p class="body-lg reveal-el" style="margin-top:20px;">
+          La velocidad es la derivada de la posición. La aceleración es la derivada de la velocidad.
+          El cálculo conecta estas tres ideas.
+        </p>
+        <div class="pva-readout reveal-el">
+          <div class="readout-item">
+            <span class="readout-label">Posición</span>
+            <span class="readout-value" id="pva-position">0.00</span>
+          </div>
+          <div class="readout-item">
+            <span class="readout-label">Velocidad</span>
+            <span class="readout-value" id="pva-velocity">0.00</span>
+          </div>
+          <div class="readout-item">
+            <span class="readout-label">Aceleración</span>
+            <span class="readout-value" id="pva-acceleration">0.00</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============================================================
+       10 — SIMULACIÓN F = MA
+       ============================================================ -->
+  <section id="scene-fma" class="scene" aria-label="Simulación de F igual m a">
+    <div class="scene-inner split">
+      <div class="split-text">
+        <p class="eyebrow reveal-el">Segunda ley de Newton</p>
+        <h2 class="display-1 reveal-el" id="fma-formula" style="margin-top:16px;">F = ma</h2>
+        <p class="body-lg reveal-el" style="margin-top:20px;">
+          Ajusta la masa y la fuerza. La aceleración resultante se calcula en tiempo real: a = F / m.
+        </p>
+        <div class="sim-controls reveal-el">
+          <div class="slider-row">
+            <label for="mass-slider">Masa (kg)</label>
+            <input type="range" id="mass-slider" min="1" max="20" step="0.5" value="5">
+          </div>
+          <div class="slider-row">
+            <label for="force-slider">Fuerza (N)</label>
+            <input type="range" id="force-slider" min="0" max="50" step="1" value="15">
+          </div>
+        </div>
+        <div class="viz-readout reveal-el">
+          <div class="readout-item">
+            <span class="readout-label">Fuerza</span>
+            <span class="readout-value" id="fma-force-value">15 N</span>
+          </div>
+          <div class="readout-item">
+            <span class="readout-label">Masa</span>
+            <span class="readout-value" id="fma-mass-value">5 kg</span>
+          </div>
+          <div class="readout-item">
+            <span class="readout-label">Aceleración</span>
+            <span class="readout-value" id="fma-accel-value">3.00 m/s²</span>
+          </div>
+        </div>
+      </div>
+      <div class="split-visual viz-panel" id="fma-panel">
+        <canvas id="fma-canvas"></canvas>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============================================================
+       11 — GRAVEDAD Y ÓRBITAS
+       ============================================================ -->
+  <section id="scene-gravity" class="scene" aria-label="Gravedad y órbitas">
+    <span class="scene-number">07 — GRAVEDAD</span>
+    <div class="scene-inner split reverse">
+      <div class="split-visual viz-panel" id="gravity-panel">
+        <canvas id="gravity-canvas"></canvas>
+      </div>
+      <div class="split-text">
+        <p class="eyebrow reveal-el">Movimiento orbital</p>
+        <h2 class="display-1 reveal-el" style="margin-top:16px;">Qué mantiene a un cuerpo en órbita</h2>
+        <p class="body-lg reveal-el" style="margin-top:20px;">
+          La misma gravedad que hace caer una manzana puede mantener a un cuerpo girando
+          alrededor de otro, si su velocidad y distancia son las adecuadas.
+        </p>
+        <div class="sim-controls reveal-el">
+          <div class="slider-row">
+            <label for="orbit-velocity-slider">Velocidad inicial</label>
+            <input type="range" id="orbit-velocity-slider" min="0.5" max="2.2" step="0.05" value="1.15">
+          </div>
+          <div class="slider-row">
+            <label for="orbit-distance-slider">Distancia</label>
+            <input type="range" id="orbit-distance-slider" min="60" max="160" step="5" value="110">
+          </div>
+        </div>
+        <button class="link-quiet reveal-el" id="orbit-reset-btn" style="margin-top:20px;">Reiniciar órbita</button>
+        <p class="viz-hint reveal-el" id="orbit-status">Órbita estable.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============================================================
+       12 — UNIVERSO
+       ============================================================ -->
+  <section id="scene-universe" class="scene" aria-label="El universo">
+    <canvas id="universe-canvas" class="scene-canvas" aria-hidden="true"></canvas>
+    <div class="scene-veil" aria-hidden="true"></div>
+    <div class="universe-headline scene-inner">
+      <p class="eyebrow reveal-el">A gran escala</p>
+      <h2 class="display-1 reveal-el" style="margin-top:18px;">Las matemáticas pueden describir el movimiento del universo.</h2>
+    </div>
+  </section>
+
+  <!-- ============================================================
+       13 — MANUSCRITOS
+       ============================================================ -->
+  <section id="scene-manuscript" class="scene" aria-label="Del manuscrito a la pantalla">
+    <span class="scene-number">08 — LEGADO</span>
+    <div class="scene-inner split">
+      <div class="manuscript-sheet reveal-el">
+        <svg viewBox="0 0 400 500" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+          <defs>
+            <filter id="grain"><feTurbulence type="fractalNoise" baseFrequency="0.9" numOctaves="2" result="n"/><feColorMatrix in="n" type="matrix" values="0 0 0 0 0.85  0 0 0 0 0.75  0 0 0 0 0.6  0 0 0 0.05 0"/></filter>
+          </defs>
+          <rect x="0" y="0" width="400" height="500" fill="none" filter="url(#grain)"/>
+          <g stroke="#b5713f" stroke-width="1" fill="none" opacity="0.85">
+            <ellipse cx="200" cy="190" rx="120" ry="70" />
+            <circle cx="140" cy="190" r="2.4" fill="#c9a961" stroke="none"/>
+            <circle cx="260" cy="190" r="2.4" fill="#c9a961" stroke="none"/>
+            <line x1="140" y1="190" x2="230" y2="145" stroke-dasharray="3 4"/>
+            <line x1="260" y1="190" x2="230" y2="145" stroke-dasharray="3 4"/>
+            <line x1="80" y1="190" x2="320" y2="190" stroke-dasharray="2 5" opacity="0.5"/>
+            <circle cx="230" cy="145" r="3" fill="none"/>
+            <path d="M 200 190 L 200 40" stroke-dasharray="2 6" opacity="0.4"/>
+            <path d="M 60 330 Q 160 260 260 330 T 340 300" />
+            <circle cx="60" cy="330" r="2" fill="#c9a961" stroke="none"/>
+            <circle cx="160" cy="290" r="2" fill="#c9a961" stroke="none"/>
+            <circle cx="260" cy="330" r="2" fill="#c9a961" stroke="none"/>
+          </g>
+          <g font-family="Fraunces, serif" font-size="13" fill="#cbb896" opacity="0.75">
+            <text x="55" y="400">Prop. XI.</text>
+            <text x="55" y="420" font-size="11" opacity="0.7">de motu corporum</text>
+            <text x="230" y="120" font-size="11">A</text>
+            <text x="130" y="205" font-size="11">F&#8321;</text>
+            <text x="265" y="205" font-size="11">F&#8322;</text>
+          </g>
+          <g stroke="#b5713f" stroke-width="0.6" opacity="0.4">
+            <line x1="40" y1="60" x2="40" y2="440"/>
+            <line x1="40" y1="440" x2="360" y2="440"/>
+          </g>
+        </svg>
+      </div>
+      <div class="split-text">
+        <p class="eyebrow reveal-el">Del papel a la pantalla</p>
+        <h2 class="display-1 reveal-el" style="margin-top:16px;">Ideas escritas a mano, vigentes hoy</h2>
+        <p class="body-lg reveal-el" style="margin-top:20px;">
+          Newton desarrolló buena parte de su trabajo en cuadernos y manuscritos, con
+          diagramas geométricos y anotaciones numéricas. Siglos después, esas mismas ideas
+          se ejecutan en tiempo real dentro de una pantalla como esta.
+        </p>
+        <div class="paper-to-code reveal-el">
+          <span>Papel</span><span aria-hidden="true">→</span><span>Computadora</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============================================================
+       14 — DATOS CURIOSOS
+       ============================================================ -->
+  <section id="scene-curiosities" class="scene" aria-label="Datos curiosos">
+    <div class="scene-inner">
+      <p class="eyebrow reveal-el">Datos curiosos</p>
+      <h2 class="display-1 reveal-el" style="margin-top:16px;margin-bottom:40px;">Tres notas sobre su trabajo</h2>
+      <div class="fact-list" id="fact-list">
+        <div class="fact reveal-el" data-fact>
+          <div class="fact-head"><span class="fact-num">01</span><h3 class="fact-title">El método de las fluxiones</h3><span class="fact-toggle" aria-hidden="true">+</span></div>
+          <div class="fact-body"><p>Newton llamó "fluxiones" a su método para estudiar cantidades que cambian continuamente, una de las bases de lo que hoy llamamos cálculo diferencial.</p></div>
+        </div>
+        <div class="fact reveal-el" data-fact>
+          <div class="fact-head"><span class="fact-num">02</span><h3 class="fact-title">Un descubrimiento compartido</h3><span class="fact-toggle" aria-hidden="true">+</span></div>
+          <div class="fact-body"><p>Newton y Gottfried Leibniz desarrollaron, de forma independiente, métodos fundamentales del cálculo alrededor de la misma época, lo que generó una célebre disputa histórica sobre la prioridad del descubrimiento.</p></div>
+        </div>
+        <div class="fact reveal-el" data-fact>
+          <div class="fact-head"><span class="fact-num">03</span><h3 class="fact-title">Matemáticas al servicio del movimiento</h3><span class="fact-toggle" aria-hidden="true">+</span></div>
+          <div class="fact-body"><p>Las herramientas matemáticas de Newton no eran un fin en sí mismas: le permitieron formular sus leyes del movimiento y describir la gravitación de forma precisa y predictiva.</p></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============================================================
+       15 — CONCLUSIÓN
+       ============================================================ -->
+  <section id="scene-conclusion" class="scene" aria-label="Conclusión">
+    <canvas id="conclusion-canvas" class="scene-canvas" aria-hidden="true"></canvas>
+    <div class="scene-inner" style="text-align:center;">
+      <p id="conclusion-recap" class="serif" style="font-size:clamp(1.6rem,4vw,2.6rem);color:var(--brass-soft);min-height:1.4em;opacity:0;" aria-hidden="true"></p>
+      <h2 class="display-mega reveal-el" style="font-size:clamp(2.6rem,9vw,7rem);">ISAAC NEWTON</h2>
+      <div class="conclusion-words reveal-el">
+        <span>Cambio</span><span>Movimiento</span><span>Universo</span>
+      </div>
+      <p class="conclusion-final reveal-el">
+        Las matemáticas nos permiten convertir el cambio y el movimiento en algo que
+        podemos describir, analizar y comprender.
+      </p>
+    </div>
+  </section>
+
+</main>
+
+<noscript>
+  <p><strong>Isaac Newton — Las matemáticas que ayudaron a explicar el universo.</strong></p>
+  <p>Esta experiencia necesita JavaScript para sus animaciones y simulaciones interactivas. Por favor, actívalo para explorarla.</p>
+</noscript>
+
+<script>
+(function(){
+  'use strict';
+
+  /* ================= ENVIRONMENT ================= */
+  var reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  var isFinePointer = window.matchMedia('(pointer: fine)').matches;
+  document.documentElement.classList.add('js');
+  if(reducedMotion){ document.body.classList.add('reduced-motion'); }
+
+  var gsapReady = (typeof gsap !== 'undefined');
+  var stReady = gsapReady && (typeof ScrollTrigger !== 'undefined');
+  if(stReady){ gsap.registerPlugin(ScrollTrigger); }
+
+  /* ================= UTILITIES ================= */
+  function clamp(v,min,max){ return Math.max(min, Math.min(max, v)); }
+  function lerp(a,b,t){ return a + (b-a)*t; }
+  function mapRange(v,inMin,inMax,outMin,outMax){
+    var t = clamp(v, Math.min(inMin,inMax), Math.max(inMin,inMax));
+    return outMin + (t-inMin) * (outMax-outMin) / (inMax-inMin);
+  }
+  function safeKatex(el, tex, displayMode){
+    if(!el) return;
+    try{
+      if(window.katex){ katex.render(tex, el, {throwOnError:false, displayMode: !!displayMode}); }
+      else { el.textContent = tex; }
+    }catch(e){ el.textContent = tex; }
+  }
+  function gtoSafe(el, vars){
+    if(!el) return;
+    if(gsapReady){ gsap.to(el, vars); }
+    else{
+      if('opacity' in vars) el.style.opacity = vars.opacity;
+    }
+  }
+  function onceInView(el, cb, threshold){
+    if(!el) return;
+    var io = new IntersectionObserver(function(entries){
+      entries.forEach(function(entry){
+        if(entry.isIntersecting){ cb(); io.unobserve(entry.target); }
+      });
+    }, {threshold: threshold || 0.35});
+    io.observe(el);
+  }
+
+  /* ================= CUSTOM CURSOR ================= */
+  function initCursor(){
+    if(!isFinePointer) return;
+    document.body.classList.add('uses-custom-cursor');
+    var ring = document.getElementById('cursor-ring');
+    var dot = document.getElementById('cursor-dot');
+    var tx = window.innerWidth/2, ty = window.innerHeight/2;
+    var dx = tx, dy = ty, rx = tx, ry = ty;
+    var visible = false;
+    window.addEventListener('pointermove', function(e){
+      tx = e.clientX; ty = e.clientY;
+      if(!visible){ visible = true; ring.style.opacity = 1; dot.style.opacity = 1; }
+    });
+    window.addEventListener('pointerleave', function(){ ring.style.opacity = 0; dot.style.opacity = 0; });
+    ring.style.opacity = 0; dot.style.opacity = 0;
+    ring.style.transition += ', opacity .3s ease';
+    dot.style.transition = 'opacity .3s ease';
+
+    function raf(){
+      dx = lerp(dx, tx, 0.35); dy = lerp(dy, ty, 0.35);
+      rx = lerp(rx, tx, 0.16); ry = lerp(ry, ty, 0.16);
+      dot.style.transform = 'translate(' + dx + 'px,' + dy + 'px) translate(-50%,-50%)';
+      ring.style.transform = 'translate(' + rx + 'px,' + ry + 'px) translate(-50%,-50%)';
+      requestAnimationFrame(raf);
+    }
+    requestAnimationFrame(raf);
+
+    var hoverSel = 'a, button, input[type=range], .timeline-point, [data-fact]';
+    document.addEventListener('pointerover', function(e){
+      if(e.target.closest && e.target.closest(hoverSel)) ring.classList.add('is-active');
+    });
+    document.addEventListener('pointerout', function(e){
+      if(e.target.closest && e.target.closest(hoverSel)) ring.classList.remove('is-active');
+    });
+    document.addEventListener('pointerdown', function(e){
+      if(e.target.closest && e.target.closest('input[type=range], .viz-panel canvas')) ring.classList.add('is-drag');
+    });
+    document.addEventListener('pointerup', function(){ ring.classList.remove('is-drag'); });
+  }
+
+  /* ================= LOADING SEQUENCE ================= */
+  function runLoadingSequence(onDone){
+    var screen = document.getElementById('loading-screen');
+    var text = document.getElementById('loading-text');
+    var bar = screen.querySelector('#loading-bar span');
+    var circle = screen.querySelector('circle');
+    var steps = ['CALCULANDO...', 'INICIALIZANDO EXPERIENCIA', 'NEWTON'];
+    var i = 0;
+
+    if(circle){
+      if(gsapReady){ gsap.to(circle, {strokeDashoffset:0, duration: reducedMotion?0.2:1.6, ease:'power2.inOut'}); }
+      else { circle.style.strokeDashoffset = 0; }
+    }
+
+    function nextStep(){
+      text.textContent = steps[i];
+      var pct = ((i+1)/steps.length) * 100;
+      if(gsapReady){ gsap.to(bar, {width: pct+'%', duration: 0.5, ease:'power2.out'}); }
+      else { bar.style.width = pct+'%'; }
+      i++;
+      if(i < steps.length){
+        setTimeout(nextStep, reducedMotion ? 80 : 620);
+      } else {
+        setTimeout(function(){
+          if(gsapReady){
+            gsap.to(screen, {opacity:0, duration:0.7, ease:'power2.inOut', onComplete:function(){
+              screen.style.display = 'none';
+              onDone();
+            }});
+          } else {
+            screen.style.display = 'none';
+            onDone();
+          }
+        }, reducedMotion ? 60 : 450);
+      }
+    }
+    nextStep();
+  }
+
+  /* ================= HERO CINEMATIC INTRO ================= */
+  function initHero(){
+    var section = document.getElementById('scene-hero');
+    var canvas = document.getElementById('hero-canvas');
+    var ctx = canvas.getContext('2d');
+    var W=0,H=0,DPR=1;
+
+    function resize(){
+      DPR = Math.min(window.devicePixelRatio||1, 2);
+      W = section.clientWidth; H = section.clientHeight;
+      canvas.width = Math.round(W*DPR); canvas.height = Math.round(H*DPR);
+      ctx.setTransform(DPR,0,0,DPR,0,0);
+    }
+    resize();
+    window.addEventListener('resize', resize);
+
+    var N = reducedMotion ? 34 : 90;
+    var particles = [];
+    for(var k=0;k<N;k++){
+      particles.push({
+        x: Math.random(), y: Math.random(),
+        r: Math.random()*1.3+0.35,
+        phase: Math.random()*Math.PI*2,
+        speed: Math.random()*0.4+0.15
+      });
+    }
+
+    function drawParticles(alpha){
+      if(alpha<=0) return;
+      for(var i=0;i<particles.length;i++){
+        var p = particles[i];
+        if(!reducedMotion) p.phase += p.speed*0.02;
+        var flicker = 0.5+0.5*Math.sin(p.phase);
+        ctx.beginPath();
+        ctx.fillStyle = 'rgba(238,241,246,' + ((0.12+0.35*flicker)*alpha) + ')';
+        ctx.arc(p.x*W, p.y*H, p.r, 0, Math.PI*2);
+        ctx.fill();
+      }
+    }
+
+    function drawCurve(t, alpha){
+      if(t<=0 || alpha<=0) return;
+      var cx=W*0.5, cy=H*0.44, span=Math.min(W, H*1.5)*0.62;
+      var steps=110, count=Math.max(1, Math.floor(steps*t));
+      ctx.beginPath();
+      for(var i=0;i<=count;i++){
+        var u = i/steps;
+        var x = cx - span*0.5 + span*u;
+        var y = cy - Math.sin(u*Math.PI)*span*0.22;
+        if(i===0) ctx.moveTo(x,y); else ctx.lineTo(x,y);
+      }
+      ctx.strokeStyle = 'rgba(201,169,97,' + alpha + ')';
+      ctx.lineWidth = 1.3;
+      ctx.stroke();
+    }
+
+    function drawOrbit(t, alpha){
+      if(t<=0 || alpha<=0) return;
+      var cx=W*0.5, cy=H*0.46;
+      var rx=Math.min(W,H)*0.30, ry=rx*0.4;
+      var end=Math.PI*2*t;
+      ctx.beginPath();
+      for(var a=0;a<=end;a+=0.03){
+        var x = cx + rx*Math.cos(a-Math.PI/2);
+        var y = cy + ry*Math.sin(a-Math.PI/2);
+        if(a===0) ctx.moveTo(x,y); else ctx.lineTo(x,y);
+      }
+      ctx.strokeStyle = 'rgba(201,169,97,' + alpha + ')';
+      ctx.lineWidth = 1.1;
+      ctx.stroke();
+      ctx.beginPath();
+      ctx.fillStyle = 'rgba(238,241,246,' + alpha + ')';
+      ctx.arc(cx,cy,2.6,0,Math.PI*2);
+      ctx.fill();
+    }
+
+    var mode = 'idle';
+    var introStart = 0;
+    var introDuration = reducedMotion ? 1 : 4400;
+    var flags = {name:false, kicker:false, tagline:false, meta:false, cta:false, formulas:false};
+
+    function reveal(sel){
+      var el = document.querySelector(sel);
+      if(!el) return;
+      gtoSafe(el, {opacity:1, y:0, duration:1, ease:'power2.out'});
+    }
+
+    function revealFormulas(){
+      if(flags.formulas) return;
+      flags.formulas = true;
+      safeKatex(document.getElementById('hero-formula-1'), 'F=ma');
+      safeKatex(document.getElementById('hero-formula-2'), '\\int f(x)\\,dx');
+      safeKatex(document.getElementById('hero-formula-3'), "f'(x)=2x");
+      ['hero-formula-1','hero-formula-2','hero-formula-3'].forEach(function(id, idx){
+        var el = document.getElementById(id);
+        if(!el) return;
+        gtoSafe(el, {opacity:1, duration:1.1, delay: idx*0.15, ease:'power1.out'});
+      });
+    }
+
+    function frame(now){
+      ctx.clearRect(0,0,W,H);
+      if(mode === 'intro'){
+        var t = clamp((now-introStart)/introDuration, 0, 1);
+        var particleAlpha = mapRange(t,0,0.18,0,1);
+        drawParticles(clamp(particleAlpha,0,1));
+
+        var curveDraw = mapRange(t,0.15,0.5,0,1);
+        var curveFade = 1-mapRange(t,0.48,0.6,0,1);
+        drawCurve(clamp(curveDraw,0,1), clamp(curveDraw,0,1)*clamp(curveFade,0,1));
+
+        var orbitDraw = mapRange(t,0.5,0.82,0,1);
+        var orbitFade = 1-mapRange(t,0.8,0.94,0,1);
+        drawOrbit(clamp(orbitDraw,0,1), clamp(orbitDraw,0,1)*clamp(orbitFade,0,1));
+
+        if(t>=0.58 && !flags.name){ flags.name=true; reveal('#hero-name'); }
+        if(t>=0.66 && !flags.kicker){ flags.kicker=true; reveal('.hero-kicker'); }
+        if(t>=0.78 && !flags.tagline){ flags.tagline=true; reveal('.hero-tagline'); }
+        if(t>=0.87 && !flags.meta){ flags.meta=true; reveal('.hero-meta'); }
+        if(t>=0.93 && !flags.cta){ flags.cta=true; reveal('.hero-cta'); }
+
+        if(t>=1){ mode='ambient'; revealFormulas(); }
+      } else if(mode === 'ambient'){
+        drawParticles(reducedMotion ? 0.55 : 0.85);
+      }
+      requestAnimationFrame(frame);
+    }
+    requestAnimationFrame(frame);
+
+    function play(){
+      mode = 'intro';
+      introStart = performance.now();
+      if(reducedMotion){
+        Object.keys(flags).forEach(function(k){ flags[k]=true; });
+        ['.hero-kicker','#hero-name','.hero-tagline','.hero-meta','.hero-cta'].forEach(reveal);
+        mode = 'ambient';
+        revealFormulas();
+      }
+    }
+
+    if(stReady){
+      ScrollTrigger.create({
+        trigger: section, start:'top top', end:'bottom top', scrub:0.4,
+        onUpdate: function(self){
+          var p = self.progress;
+          canvas.style.transform = 'scale(' + (1+p*0.15) + ')';
+          canvas.style.filter = 'blur(' + (p*6) + 'px)';
+          canvas.style.opacity = String(1 - p*0.6);
+        }
+      });
+    }
+
+    document.getElementById('enter-experience-btn').addEventListener('click', function(){
+      var target = document.getElementById('scene-who');
+      if(target) target.scrollIntoView({behavior: reducedMotion ? 'auto' : 'smooth'});
+    });
+
+    return {play: play};
+  }
+
+  /* ================= GENERIC SCROLL REVEALS ================= */
+  function initGenericReveals(){
+    var scenes = document.querySelectorAll('.scene:not(#scene-hero)');
+    scenes.forEach(function(scene){
+      var els = scene.querySelectorAll('.reveal-el');
+      if(!els.length) return;
+      if(gsapReady){ gsap.set(els, {opacity:0, y:16}); }
+      if(stReady){
+        ScrollTrigger.create({
+          trigger: scene, start:'top 78%', once:true,
+          onEnter: function(){
+            gsap.to(els, {opacity:1, y:0, duration:0.9, ease:'power2.out', stagger:0.06});
+          }
+        });
+      } else {
+        onceInView(scene, function(){
+          els.forEach(function(el){ el.style.opacity = 1; });
+        }, 0.2);
+      }
+    });
+  }
+
+  /* ================= NAVIGATION ================= */
+  function initNav(){
+    var nav = document.getElementById('scene-nav');
+    var navItems = Array.prototype.slice.call(document.querySelectorAll('.nav-item'));
+    var progressEl = document.getElementById('nav-progress-current');
+
+    navItems.forEach(function(item){
+      item.addEventListener('click', function(){
+        var target = document.getElementById(item.getAttribute('data-target'));
+        if(target){ target.scrollIntoView({behavior: reducedMotion ? 'auto' : 'smooth'}); }
+      });
+    });
+
+    onceInView(document.getElementById('scene-who'), function(){ nav.classList.add('is-visible'); }, 0.05);
+
+    var groupStartIds = navItems.map(function(item){ return item.getAttribute('data-target'); });
+    var groupEls = groupStartIds.map(function(id){ return document.getElementById(id); });
+
+    function setActive(idx){
+      navItems.forEach(function(item, i){ item.classList.toggle('is-active', i===idx); });
+      if(progressEl) progressEl.textContent = String(idx+1).padStart(2,'0');
+    }
+
+    if(stReady){
+      groupEls.forEach(function(el, idx){
+        if(!el) return;
+        ScrollTrigger.create({
+          trigger: el, start:'top 55%', end:'bottom 55%',
+          onEnter: function(){ setActive(idx); },
+          onEnterBack: function(){ setActive(idx); }
+        });
+      });
+    } else {
+      window.addEventListener('scroll', function(){
+        var y = window.scrollY + window.innerHeight*0.4;
+        var idx = 0;
+        groupEls.forEach(function(el, i){ if(el && el.offsetTop <= y) idx = i; });
+        setActive(idx);
+      });
+    }
+    setActive(0);
+  }
+
+  /* ================= TIMELINE ================= */
+  function initTimeline(){
+    var section = document.getElementById('scene-timeline');
+    var points = Array.prototype.slice.call(document.querySelectorAll('.timeline-point'));
+    var fill = document.getElementById('timeline-fill');
+    var detailYear = document.querySelector('.timeline-detail-year');
+    var detailText = document.querySelector('.timeline-detail-text');
+    if(!points.length) return;
+
+    function setActive(idx){
+      idx = clamp(idx, 0, points.length-1);
+      points.forEach(function(pt, i){
+        var active = i===idx;
+        pt.classList.toggle('is-active', active);
+        pt.setAttribute('aria-selected', active ? 'true' : 'false');
+      });
+      var pct = (idx/(points.length-1)) * 100;
+      fill.style.width = pct + '%';
+      detailYear.textContent = points[idx].getAttribute('data-year');
+      detailText.textContent = points[idx].getAttribute('data-text');
+    }
+
+    points.forEach(function(pt, idx){
+      pt.addEventListener('click', function(){ setActive(idx); });
+    });
+
+    if(stReady && !reducedMotion){
+      ScrollTrigger.create({
+        trigger: section, start:'top top', end:'+=140%', pin:true, scrub:0.6,
+        onUpdate: function(self){
+          var idx = Math.round(self.progress * (points.length-1));
+          setActive(idx);
+        }
+      });
+    } else {
+      onceInView(section, function(){ setActive(0); }, 0.2);
+    }
+  }
+
+  /* ================= WHO-WORDS PROGRESSIVE LIGHT-UP ================= */
+  function initWhoWords(){
+    var container = document.getElementById('who-words');
+    if(!container) return;
+    var words = container.querySelectorAll('[data-word]');
+    if(gsapReady){ gsap.set(words, {opacity:0, y:10}); }
+    function play(){
+      words.forEach(function(w, i){
+        if(gsapReady){
+          gsap.to(w, {opacity:1, y:0, duration:0.6, delay:i*0.16, ease:'power2.out', onComplete:function(){
+            w.classList.add('is-lit');
+          }});
+        } else {
+          setTimeout(function(){ w.style.opacity=1; w.classList.add('is-lit'); }, i*160);
+        }
+      });
+    }
+    onceInView(container, play, 0.5);
+  }
+
+  /* ================= ABSTRACT ORNAMENT (used for "who was Newton") ================= */
+  function initOrnament(canvasId){
+    var canvas = document.getElementById(canvasId);
+    if(!canvas) return;
+    var parent = canvas.parentElement;
+    var ctx = canvas.getContext('2d');
+    var W,H,DPR;
+    function resize(){
+      DPR = Math.min(window.devicePixelRatio||1, 2);
+      W = parent.clientWidth; H = parent.clientHeight;
+      canvas.width = Math.round(W*DPR); canvas.height = Math.round(H*DPR);
+      ctx.setTransform(DPR,0,0,DPR,0,0);
+    }
+    resize();
+    window.addEventListener('resize', resize);
+
+    var rings = [0.32, 0.24, 0.17, 0.10];
+    var nodeCount = 5;
+    var angle = 0;
+    var running = false;
+
+    function draw(){
+      ctx.clearRect(0,0,W,H);
+      var cx=W*0.5, cy=H*0.48;
+      var base = Math.min(W,H);
+      rings.forEach(function(rFrac, i){
+        var r = base*rFrac;
+        ctx.beginPath();
+        ctx.arc(cx,cy,r,angle*(i%2===0?1:-1)*0.4, angle*(i%2===0?1:-1)*0.4 + Math.PI*1.5);
+        ctx.strokeStyle = 'rgba(201,169,97,' + (0.5 - i*0.09) + ')';
+        ctx.lineWidth = 1;
+        ctx.stroke();
+        for(var n=0;n<nodeCount;n++){
+          var a = angle*(i%2===0?1:-1) + (n/nodeCount)*Math.PI*2;
+          var nx = cx + r*Math.cos(a), ny = cy + r*Math.sin(a);
+          ctx.beginPath();
+          ctx.fillStyle = 'rgba(238,241,246,0.5)';
+          ctx.arc(nx,ny,1.4,0,Math.PI*2);
+          ctx.fill();
+        }
+      });
+      ctx.beginPath();
+      ctx.moveTo(cx - base*0.36, cy);
+      ctx.lineTo(cx + base*0.36, cy);
+      ctx.moveTo(cx, cy - base*0.36);
+      ctx.lineTo(cx, cy + base*0.36);
+      ctx.strokeStyle = 'rgba(238,241,246,0.06)';
+      ctx.lineWidth = 1;
+      ctx.stroke();
+    }
+
+    function loop(){
+      if(!running) return;
+      angle += 0.0022;
+      draw();
+      requestAnimationFrame(loop);
+    }
+
+    draw();
+    onceInView(parent, function(){
+      if(reducedMotion) return;
+      running = true;
+      requestAnimationFrame(loop);
+    }, 0.15);
+  }
+
+  /* ================= CHANGE SCENE (ball + trace) ================= */
+  function initChangeScene(){
+    var canvas = document.getElementById('change-canvas');
+    if(!canvas) return;
+    var parent = canvas.parentElement;
+    var ctx = canvas.getContext('2d');
+    var W,H,DPR;
+    function resize(){
+      DPR = Math.min(window.devicePixelRatio||1, 2);
+      W = parent.clientWidth; H = parent.clientHeight;
+      canvas.width = Math.round(W*DPR); canvas.height = Math.round(H*DPR);
+      ctx.setTransform(DPR,0,0,DPR,0,0);
+    }
+    resize();
+    window.addEventListener('resize', resize);
+
+    var samples = [];
+    var maxSamples = 140;
+    var t = 0;
+    var running = false;
+
+    function step(dt){
+      t += dt;
+      var x = Math.sin(t*1.1);
+      samples.push(x);
+      if(samples.length > maxSamples) samples.shift();
+    }
+
+    function draw(){
+      ctx.clearRect(0,0,W,H);
+      var ballTrackY = H*0.28;
+      var ballX = W*0.5 + (samples.length ? samples[samples.length-1] : 0) * (W*0.32);
+
+      ctx.beginPath();
+      ctx.moveTo(W*0.14, ballTrackY);
+      ctx.lineTo(W*0.86, ballTrackY);
+      ctx.strokeStyle = 'rgba(238,241,246,0.12)';
+      ctx.lineWidth = 1;
+      ctx.stroke();
+
+      ctx.beginPath();
+      ctx.arc(ballX, ballTrackY, 7, 0, Math.PI*2);
+      ctx.fillStyle = 'rgba(201,169,97,0.95)';
+      ctx.fill();
+
+      var graphTop = H*0.52, graphBottom = H*0.86;
+      var graphLeft = W*0.14, graphRight = W*0.86;
+      ctx.beginPath();
+      ctx.moveTo(graphLeft, (graphTop+graphBottom)/2);
+      ctx.lineTo(graphRight, (graphTop+graphBottom)/2);
+      ctx.strokeStyle = 'rgba(238,241,246,0.1)';
+      ctx.stroke();
+
+      if(samples.length > 1){
+        ctx.beginPath();
+        for(var i=0;i<samples.length;i++){
+          var u = i/(maxSamples-1);
+          var gx = graphLeft + u*(graphRight-graphLeft);
+          var gy = (graphTop+graphBottom)/2 - samples[i]*((graphBottom-graphTop)/2)*0.9;
+          if(i===0) ctx.moveTo(gx,gy); else ctx.lineTo(gx,gy);
+        }
+        ctx.strokeStyle = 'rgba(201,169,97,0.85)';
+        ctx.lineWidth = 1.4;
+        ctx.stroke();
+      }
+    }
+
+    function loop(now){
+      if(!running) return;
+      step(0.02);
+      draw();
+      requestAnimationFrame(loop);
+    }
+
+    if(reducedMotion){
+      for(var i=0;i<maxSamples;i++){ step(0.02); }
+      draw();
+    } else {
+      draw();
+      onceInView(parent, function(){ running = true; requestAnimationFrame(loop); }, 0.15);
+    }
+  }
+
+  /* ================= DERIVATIVE INTERACTIVE ================= */
+  function initDerivative(){
+    var panel = document.getElementById('derivative-panel');
+    var canvas = document.getElementById('derivative-canvas');
+    if(!panel || !canvas) return;
+    var ctx = canvas.getContext('2d');
+    var W,H,DPR;
+
+    var xMin=-3, xMax=3, yMin=-2.2, yMax=10;
+    var margin;
+
+    function resize(){
+      DPR = Math.min(window.devicePixelRatio||1, 2);
+      W = panel.clientWidth; H = panel.clientHeight;
+      canvas.width = Math.round(W*DPR); canvas.height = Math.round(H*DPR);
+      ctx.setTransform(DPR,0,0,DPR,0,0);
+      margin = Math.min(W,H)*0.14;
+      draw();
+    }
+
+    function toPxX(x){ return margin + (x-xMin)/(xMax-xMin) * (W-margin*2); }
+    function toPxY(y){ return (H-margin) - (y-yMin)/(yMax-yMin) * (H-margin*2); }
+    function toDataX(px){ return xMin + (px-margin)/(W-margin*2) * (xMax-xMin); }
+
+    function f(x){ return x*x; }
+    function fPrime(x){ return 2*x; }
+
+    var derivX = 1.4;
+
+    function draw(){
+      if(!W) return;
+      ctx.clearRect(0,0,W,H);
+
+      // axes
+      ctx.strokeStyle = 'rgba(238,241,246,0.14)';
+      ctx.lineWidth = 1;
+      ctx.beginPath();
+      ctx.moveTo(margin, toPxY(0)); ctx.lineTo(W-margin, toPxY(0));
+      ctx.moveTo(toPxX(0), margin); ctx.lineTo(toPxX(0), H-margin);
+      ctx.stroke();
+
+      // curve
+      ctx.beginPath();
+      var steps = 140;
+      for(var i=0;i<=steps;i++){
+        var x = xMin + (i/steps)*(xMax-xMin);
+        var y = f(x);
+        var px = toPxX(x), py = toPxY(y);
+        if(i===0) ctx.moveTo(px,py); else ctx.lineTo(px,py);
+      }
+      ctx.strokeStyle = 'rgba(238,241,246,0.55)';
+      ctx.lineWidth = 1.6;
+      ctx.stroke();
+
+      // tangent line
+      var slope = fPrime(derivX);
+      var y0 = f(derivX);
+      var x1 = xMin, y1 = y0 + slope*(x1-derivX);
+      var x2 = xMax, y2 = y0 + slope*(x2-derivX);
+      ctx.save();
+      ctx.beginPath();
+      ctx.rect(margin, margin, W-margin*2, H-margin*2);
+      ctx.clip();
+      ctx.beginPath();
+      ctx.moveTo(toPxX(x1), toPxY(y1));
+      ctx.lineTo(toPxX(x2), toPxY(y2));
+      ctx.strokeStyle = 'rgba(201,169,97,0.9)';
+      ctx.lineWidth = 1.4;
+      ctx.setLineDash([5,4]);
+      ctx.stroke();
+      ctx.setLineDash([]);
+      ctx.restore();
+
+      // point
+      var pointPx = toPxX(derivX), pointPy = toPxY(y0);
+      ctx.beginPath();
+      ctx.arc(pointPx, pointPy, 6, 0, Math.PI*2);
+      ctx.fillStyle = 'rgba(201,169,97,1)';
+      ctx.fill();
+      ctx.beginPath();
+      ctx.arc(pointPx, pointPy, 10, 0, Math.PI*2);
+      ctx.strokeStyle = 'rgba(201,169,97,0.35)';
+      ctx.lineWidth = 1;
+      ctx.stroke();
+    }
+
+    function updateReadouts(){
+      var y0 = f(derivX);
+      var slope = fPrime(derivX);
+      document.getElementById('derivative-x-value').textContent = derivX.toFixed(2);
+      document.getElementById('derivative-fx-value').textContent = y0.toFixed(2);
+      document.getElementById('derivative-slope-value').textContent = slope.toFixed(2);
+    }
+
+    function setX(xData){
+      derivX = clamp(xData, xMin+0.05, xMax-0.05);
+      draw();
+      updateReadouts();
+    }
+
+    var dragging = false;
+    function pointerToX(evt){
+      var rect = canvas.getBoundingClientRect();
+      var clientX = (evt.touches && evt.touches[0]) ? evt.touches[0].clientX : evt.clientX;
+      var px = (clientX - rect.left) * (W / rect.width);
+      return toDataX(px);
+    }
+
+    canvas.addEventListener('pointerdown', function(e){
+      dragging = true;
+      canvas.setPointerCapture(e.pointerId);
+      setX(pointerToX(e));
+    });
+    canvas.addEventListener('pointermove', function(e){
+      if(!dragging) return;
+      setX(pointerToX(e));
+    });
+    canvas.addEventListener('pointerup', function(e){ dragging = false; });
+    canvas.addEventListener('pointercancel', function(){ dragging = false; });
+    canvas.addEventListener('keydown', function(e){
+      if(e.key === 'ArrowLeft'){ setX(derivX - 0.1); e.preventDefault(); }
+      if(e.key === 'ArrowRight'){ setX(derivX + 0.1); e.preventDefault(); }
+    });
+
+    window.addEventListener('resize', resize);
+    resize();
+    updateReadouts();
+
+    safeKatex(document.getElementById('derivative-fx-label'), 'f(x) = x^2', false);
+    safeKatex(document.getElementById('derivative-general-formula'), "f'(x) = 2x", false);
+  }
+
+  /* ================= INTEGRAL INTERACTIVE ================= */
+  function initIntegral(){
+    var panel = document.getElementById('integral-panel');
+    var canvas = document.getElementById('integral-canvas');
+    if(!panel || !canvas) return;
+    var ctx = canvas.getContext('2d');
+    var W,H,DPR,margin;
+
+    var xMin=0, xMax=6, yMin=0, yMax=7;
+    function h(x){ return 0.15*x*x + 0.4; }
+    var exactArea = 0.15*(Math.pow(xMax,3)/3) + 0.4*xMax - (0.15*(Math.pow(xMin,3)/3) + 0.4*xMin);
+
+    function resize(){
+      DPR = Math.min(window.devicePixelRatio||1, 2);
+      W = panel.clientWidth; H = panel.clientHeight;
+      canvas.width = Math.round(W*DPR); canvas.height = Math.round(H*DPR);
+      ctx.setTransform(DPR,0,0,DPR,0,0);
+      margin = Math.min(W,H)*0.14;
+      draw();
+    }
+    function toPxX(x){ return margin + (x-xMin)/(xMax-xMin) * (W-margin*2); }
+    function toPxY(y){ return (H-margin) - (y-yMin)/(yMax-yMin) * (H-margin*2); }
+
+    var n = 10;
+
+    function draw(){
+      if(!W) return;
+      ctx.clearRect(0,0,W,H);
+
+      ctx.strokeStyle = 'rgba(238,241,246,0.14)';
+      ctx.lineWidth = 1;
+      ctx.beginPath();
+      ctx.moveTo(margin, toPxY(0)); ctx.lineTo(W-margin, toPxY(0));
+      ctx.moveTo(toPxX(0), margin); ctx.lineTo(toPxX(0), H-margin);
+      ctx.stroke();
+
+      if(n > 0){
+        var width = (xMax-xMin)/n;
+        ctx.fillStyle = 'rgba(201,169,97,0.28)';
+        ctx.strokeStyle = 'rgba(201,169,97,0.6)';
+        ctx.lineWidth = 1;
+        for(var i=0;i<n;i++){
+          var xStart = xMin + i*width;
+          var xMid = xStart + width/2;
+          var yTop = h(xMid);
+          var px0 = toPxX(xStart), px1 = toPxX(xStart+width);
+          var py0 = toPxY(0), py1 = toPxY(yTop);
+          ctx.fillRect(px0, py1, px1-px0, py0-py1);
+          ctx.strokeRect(px0, py1, px1-px0, py0-py1);
+        }
+      }
+
+      ctx.beginPath();
+      var steps = 120;
+      for(var s=0;s<=steps;s++){
+        var x = xMin + (s/steps)*(xMax-xMin);
+        var y = h(x);
+        var px = toPxX(x), py = toPxY(y);
+        if(s===0) ctx.moveTo(px,py); else ctx.lineTo(px,py);
+      }
+      ctx.strokeStyle = 'rgba(238,241,246,0.6)';
+      ctx.lineWidth = 1.6;
+      ctx.stroke();
+    }
+
+    function riemannSum(){
+      if(n<=0) return 0;
+      var width = (xMax-xMin)/n;
+      var sum = 0;
+      for(var i=0;i<n;i++){
+        var xMid = xMin + i*width + width/2;
+        sum += h(xMid)*width;
+      }
+      return sum;
+    }
+
+    function updateReadouts(){
+      document.getElementById('integral-n-value').textContent = String(n);
+      var areaEl = document.getElementById('integral-area-value');
+      areaEl.textContent = n>0 ? riemannSum().toFixed(2) : '—';
+    }
+
+    function setN(newN){
+      n = newN;
+      var buttons = document.querySelectorAll('#rect-buttons button');
+      buttons.forEach(function(btn){
+        btn.classList.toggle('is-active', parseInt(btn.getAttribute('data-n'),10) === n);
+      });
+      draw();
+      updateReadouts();
+    }
+
+    document.querySelectorAll('#rect-buttons button').forEach(function(btn){
+      btn.addEventListener('click', function(){
+        setN(parseInt(btn.getAttribute('data-n'),10));
+      });
+    });
+
+    window.addEventListener('resize', resize);
+    resize();
+    updateReadouts();
+
+    safeKatex(document.getElementById('integral-formula'),
+      '\\int_{0}^{6} (0.15x^2+0.4)\\,dx \\approx ' + exactArea.toFixed(1), false);
+  }
+
+  /* ================= SERIES ================= */
+  function initSeries(){
+    var container = document.getElementById('series-terms');
+    var barFill = document.getElementById('series-bar-fill');
+    if(!container) return;
+    var terms = ['1','+ 1/2','+ 1/4','+ 1/8','+ 1/16','+ 1/32','+ ...'];
+    var partialFractions = [0.5, 0.75, 0.875, 0.9375, 0.96875, 0.984375, 1];
+    terms.forEach(function(txt){
+      var span = document.createElement('span');
+      span.className = 'term';
+      span.textContent = txt;
+      container.appendChild(span);
+    });
+    var spans = container.querySelectorAll('.term');
+
+    function play(){
+      if(reducedMotion){
+        spans.forEach(function(s){ s.style.opacity = 1; });
+        barFill.style.width = '100%';
+        return;
+      }
+      spans.forEach(function(s, i){
+        var pct = partialFractions[i]*100;
+        if(gsapReady){
+          gsap.to(s, {opacity:1, duration:0.4, ease:'power1.out', delay:i*0.32});
+          gsap.to(barFill, {width: pct+'%', duration:0.4, ease:'power1.out', delay:i*0.32});
+        } else {
+          setTimeout(function(){ s.style.opacity=1; barFill.style.width=pct+'%'; }, i*320);
+        }
+      });
+    }
+    onceInView(container, play, 0.4);
+  }
+
+  /* ================= MOVEMENT (position / velocity / acceleration) ================= */
+  function initMovement(){
+    var canvas = document.getElementById('movement-canvas');
+    if(!canvas) return;
+    var parent = canvas.parentElement;
+    var ctx = canvas.getContext('2d');
+    var W,H,DPR;
+    function resize(){
+      DPR = Math.min(window.devicePixelRatio||1, 2);
+      W = parent.clientWidth; H = parent.clientHeight;
+      canvas.width = Math.round(W*DPR); canvas.height = Math.round(H*DPR);
+      ctx.setTransform(DPR,0,0,DPR,0,0);
+    }
+    resize();
+    window.addEventListener('resize', resize);
+
+    var A = 1, w = 1.3;
+    var posEl = document.getElementById('pva-position');
+    var velEl = document.getElementById('pva-velocity');
+    var accEl = document.getElementById('pva-acceleration');
+
+    function drawArrow(x0,y0,x1,y1,color){
+      ctx.beginPath(); ctx.moveTo(x0,y0); ctx.lineTo(x1,y1);
+      ctx.strokeStyle = color; ctx.lineWidth = 2; ctx.stroke();
+      var angle = Math.atan2(y1-y0, x1-x0);
+      ctx.beginPath();
+      ctx.moveTo(x1,y1);
+      ctx.lineTo(x1-8*Math.cos(angle-0.4), y1-8*Math.sin(angle-0.4));
+      ctx.lineTo(x1-8*Math.cos(angle+0.4), y1-8*Math.sin(angle+0.4));
+      ctx.closePath();
+      ctx.fillStyle = color; ctx.fill();
+    }
+
+    function render(t){
+      var x = A*Math.sin(w*t);
+      var v = A*w*Math.cos(w*t);
+      var a = -A*w*w*Math.sin(w*t);
+      ctx.clearRect(0,0,W,H);
+      var cy = H*0.5, cx0 = W*0.5, scale = Math.min(W,H)*0.34;
+
+      ctx.beginPath();
+      ctx.moveTo(cx0-scale, cy); ctx.lineTo(cx0+scale, cy);
+      ctx.strokeStyle = 'rgba(238,241,246,0.12)';
+      ctx.lineWidth = 1; ctx.stroke();
+
+      var bx = cx0 + x*scale;
+      var accLen = Math.min(60, Math.abs(a)*scale*0.5);
+      var accDir = x > 0.001 ? -1 : (x < -0.001 ? 1 : 0);
+      if(accLen > 2) drawArrow(bx, cy-26, bx+accDir*accLen, cy-26, 'rgba(174,187,214,0.85)');
+
+      var velLen = Math.min(60, Math.abs(v)*scale*0.28);
+      var velDir = v > 0 ? 1 : -1;
+      if(velLen > 2) drawArrow(bx, cy+26, bx+velDir*velLen, cy+26, 'rgba(201,169,97,0.9)');
+
+      ctx.beginPath();
+      ctx.arc(bx, cy, 8, 0, Math.PI*2);
+      ctx.fillStyle = 'rgba(238,241,246,0.92)';
+      ctx.fill();
+
+      if(posEl) posEl.textContent = x.toFixed(2) + ' m';
+      if(velEl) velEl.textContent = v.toFixed(2) + ' m/s';
+      if(accEl) accEl.textContent = a.toFixed(2) + ' m/s²';
+    }
+
+    if(reducedMotion){
+      render(0.6);
+    } else {
+      var running = false, start = null;
+      function loop(now){
+        if(!running) return;
+        if(start === null) start = now;
+        render((now-start)/1000);
+        requestAnimationFrame(loop);
+      }
+      render(0);
+      onceInView(parent, function(){ running = true; requestAnimationFrame(loop); }, 0.15);
+    }
+  }
+
+  /* ================= F = MA SIMULATION ================= */
+  function initFMA(){
+    var panel = document.getElementById('fma-panel');
+    var canvas = document.getElementById('fma-canvas');
+    if(!panel || !canvas) return;
+    var ctx = canvas.getContext('2d');
+    var W,H,DPR;
+    function resize(){
+      DPR = Math.min(window.devicePixelRatio||1, 2);
+      W = panel.clientWidth; H = panel.clientHeight;
+      canvas.width = Math.round(W*DPR); canvas.height = Math.round(H*DPR);
+      ctx.setTransform(DPR,0,0,DPR,0,0);
+      draw();
+    }
+
+    var massSlider = document.getElementById('mass-slider');
+    var forceSlider = document.getElementById('force-slider');
+    var forceVal = document.getElementById('fma-force-value');
+    var massVal = document.getElementById('fma-mass-value');
+    var accelVal = document.getElementById('fma-accel-value');
+
+    safeKatex(document.getElementById('fma-formula'), 'F = ma', false);
+
+    var x = 0, v = 0;
+    var trackMargin = 40;
+
+    function currentA(){
+      var m = parseFloat(massSlider.value);
+      var F = parseFloat(forceSlider.value);
+      return F / m;
+    }
+
+    function updateReadouts(){
+      var m = parseFloat(massSlider.value);
+      var F = parseFloat(forceSlider.value);
+      var a = currentA();
+      if(forceVal) forceVal.textContent = F.toFixed(0) + ' N';
+      if(massVal) massVal.textContent = m.toFixed(1) + ' kg';
+      if(accelVal) accelVal.textContent = a.toFixed(2) + ' m/s\u00b2';
+    }
+
+    function draw(){
+      if(!W) return;
+      ctx.clearRect(0,0,W,H);
+      var trackY = H*0.62;
+      var trackLen = W - trackMargin*2;
+
+      ctx.beginPath();
+      ctx.moveTo(trackMargin, trackY); ctx.lineTo(W-trackMargin, trackY);
+      ctx.strokeStyle = 'rgba(238,241,246,0.14)';
+      ctx.lineWidth = 1; ctx.stroke();
+
+      var bx = trackMargin + clamp(x,0,1)*trackLen;
+      var bs = 22;
+      ctx.fillStyle = 'rgba(201,169,97,0.92)';
+      ctx.fillRect(bx-bs/2, trackY-bs, bs, bs);
+
+      var F = parseFloat(forceSlider.value);
+      var arrowLen = mapRange(F,0,50,10,90);
+      ctx.beginPath();
+      ctx.moveTo(bx, trackY-bs-14);
+      ctx.lineTo(bx+arrowLen, trackY-bs-14);
+      ctx.strokeStyle = 'rgba(238,241,246,0.55)';
+      ctx.lineWidth = 1.4; ctx.stroke();
+      ctx.beginPath();
+      ctx.moveTo(bx+arrowLen, trackY-bs-14);
+      ctx.lineTo(bx+arrowLen-6, trackY-bs-18);
+      ctx.lineTo(bx+arrowLen-6, trackY-bs-10);
+      ctx.closePath();
+      ctx.fillStyle = 'rgba(238,241,246,0.55)';
+      ctx.fill();
+    }
+
+    var lastTime = null;
+    function loop(now){
+      if(lastTime === null) lastTime = now;
+      var dt = Math.min((now-lastTime)/1000, 0.05);
+      lastTime = now;
+      var a = currentA();
+      v += a*dt;
+      x += v*dt*0.14;
+      if(x > 1){ x = 0; v = 0; }
+      draw();
+      requestAnimationFrame(loop);
+    }
+
+    window.addEventListener('resize', resize);
+    resize();
+    updateReadouts();
+    massSlider.addEventListener('input', updateReadouts);
+    forceSlider.addEventListener('input', updateReadouts);
+
+    if(!reducedMotion){
+      requestAnimationFrame(loop);
+    } else {
+      massSlider.addEventListener('input', draw);
+      forceSlider.addEventListener('input', draw);
+    }
+  }
+
+  /* ================= GRAVITY / ORBIT SIMULATION ================= */
+  function initGravity(){
+    var panel = document.getElementById('gravity-panel');
+    var canvas = document.getElementById('gravity-canvas');
+    if(!panel || !canvas) return;
+    var ctx = canvas.getContext('2d');
+    var W,H,DPR;
+    var velocitySlider = document.getElementById('orbit-velocity-slider');
+    var distanceSlider = document.getElementById('orbit-distance-slider');
+    var resetBtn = document.getElementById('orbit-reset-btn');
+    var statusEl = document.getElementById('orbit-status');
+
+    var K = 145; // simplified gravitational parameter, calibrated so default sliders ~ circular orbit
+    var cx, cy, body, trail, status, running;
+
+    function resize(){
+      DPR = Math.min(window.devicePixelRatio||1, 2);
+      W = panel.clientWidth; H = panel.clientHeight;
+      canvas.width = Math.round(W*DPR); canvas.height = Math.round(H*DPR);
+      ctx.setTransform(DPR,0,0,DPR,0,0);
+      cx = W/2; cy = H/2;
+      initState();
+    }
+
+    function initState(){
+      var r0 = parseFloat(distanceSlider.value);
+      var v0 = parseFloat(velocitySlider.value);
+      r0 = Math.min(r0, Math.min(W,H)*0.42);
+      body = {x: cx + r0, y: cy, vx: 0, vy: v0};
+      trail = [];
+      status = 'ok';
+      if(statusEl) statusEl.textContent = 'Órbita estable.';
+      running = true;
+      if(!reducedMotion){ draw(); }
+      else { precomputeTrail(); draw(); }
+    }
+
+    function physicsStep(sub){
+      sub = sub || 4;
+      var h = 1/sub;
+      for(var s=0;s<sub;s++){
+        var dx = cx - body.x, dy = cy - body.y;
+        var r2 = dx*dx + dy*dy;
+        var r = Math.sqrt(r2);
+        if(r < 16){ status = 'crashed'; return; }
+        var a = K / r2;
+        var ax = a*dx/r, ay = a*dy/r;
+        body.vx += ax*h; body.vy += ay*h;
+        body.x += body.vx*h; body.y += body.vy*h;
+      }
+      var rf = Math.hypot(body.x-cx, body.y-cy);
+      if(rf > Math.max(W,H)*0.9){ status = 'escaped'; }
+    }
+
+    function precomputeTrail(){
+      trail = [];
+      var steps = 1400;
+      for(var i=0;i<steps;i++){
+        physicsStep(4);
+        trail.push({x: body.x, y: body.y});
+        if(status !== 'ok') break;
+      }
+    }
+
+    function draw(){
+      if(!W) return;
+      ctx.clearRect(0,0,W,H);
+
+      var grad = ctx.createRadialGradient(cx,cy,0,cx,cy,26);
+      grad.addColorStop(0, 'rgba(201,169,97,0.9)');
+      grad.addColorStop(1, 'rgba(201,169,97,0)');
+      ctx.beginPath();
+      ctx.fillStyle = grad;
+      ctx.arc(cx,cy,26,0,Math.PI*2);
+      ctx.fill();
+      ctx.beginPath();
+      ctx.fillStyle = 'rgba(201,169,97,1)';
+      ctx.arc(cx,cy,5,0,Math.PI*2);
+      ctx.fill();
+
+      if(trail.length > 1){
+        ctx.beginPath();
+        for(var i=0;i<trail.length;i++){
+          if(i===0) ctx.moveTo(trail[i].x, trail[i].y);
+          else ctx.lineTo(trail[i].x, trail[i].y);
+        }
+        ctx.strokeStyle = 'rgba(174,187,214,0.5)';
+        ctx.lineWidth = 1;
+        ctx.stroke();
+      }
+
+      ctx.beginPath();
+      ctx.arc(body.x, body.y, 4, 0, Math.PI*2);
+      ctx.fillStyle = 'rgba(238,241,246,0.95)';
+      ctx.fill();
+    }
+
+    function loop(){
+      if(running && !reducedMotion){
+        physicsStep(4);
+        trail.push({x: body.x, y: body.y});
+        if(trail.length > 420) trail.shift();
+        draw();
+        if(status === 'crashed'){
+          running = false;
+          if(statusEl) statusEl.textContent = 'El cuerpo cayó hacia el centro.';
+        } else if(status === 'escaped'){
+          running = false;
+          if(statusEl) statusEl.textContent = 'El cuerpo escapó de la órbita.';
+        }
+      }
+      requestAnimationFrame(loop);
+    }
+
+    window.addEventListener('resize', resize);
+    resize();
+    [velocitySlider, distanceSlider].forEach(function(s){
+      s.addEventListener('input', initState);
+    });
+    if(resetBtn) resetBtn.addEventListener('click', initState);
+
+    requestAnimationFrame(loop);
+  }
+
+  /* ================= UNIVERSE STARFIELD ================= */
+  function initUniverse(){
+    var section = document.getElementById('scene-universe');
+    var canvas = document.getElementById('universe-canvas');
+    if(!section || !canvas) return;
+    var ctx = canvas.getContext('2d');
+    var W,H,DPR;
+    function resize(){
+      DPR = Math.min(window.devicePixelRatio||1, 2);
+      W = section.clientWidth; H = section.clientHeight;
+      canvas.width = Math.round(W*DPR); canvas.height = Math.round(H*DPR);
+      ctx.setTransform(DPR,0,0,DPR,0,0);
+    }
+    resize();
+    window.addEventListener('resize', resize);
+
+    var depths = [0.3, 0.55, 0.85];
+    var layers = depths.map(function(depth){
+      var count = reducedMotion ? 36 : 64;
+      var stars = [];
+      for(var i=0;i<count;i++){
+        stars.push({x: Math.random()-0.5, y: Math.random()-0.5, r: Math.random()*1.2+0.3, phase: Math.random()*Math.PI*2});
+      }
+      return {depth: depth, stars: stars};
+    });
+
+    var scrollP = 0;
+    if(stReady){
+      ScrollTrigger.create({
+        trigger: section, start:'top bottom', end:'bottom top', scrub:0.5,
+        onUpdate: function(self){ scrollP = self.progress; if(reducedMotion) draw(); }
+      });
+    }
+
+    function draw(){
+      ctx.clearRect(0,0,W,H);
+      var cx = W/2, cy = H*0.46;
+      layers.forEach(function(layer){
+        var spread = 1 + scrollP * (2.2*layer.depth);
+        layer.stars.forEach(function(s){
+          if(!reducedMotion) s.phase += 0.01*layer.depth;
+          var flicker = 0.5+0.5*Math.sin(s.phase);
+          var x = cx + s.x*W*spread;
+          var y = cy + s.y*H*spread;
+          ctx.beginPath();
+          ctx.fillStyle = 'rgba(238,241,246,' + ((0.15+0.5*flicker)*layer.depth) + ')';
+          ctx.arc(x,y,s.r,0,Math.PI*2);
+          ctx.fill();
+        });
+      });
+    }
+
+    if(reducedMotion){
+      draw();
+    } else {
+      (function loop(){
+        draw();
+        requestAnimationFrame(loop);
+      })();
+    }
+  }
+
+  /* ================= CURIOSITIES ACCORDION ================= */
+  function initCuriosities(){
+    var facts = document.querySelectorAll('[data-fact]');
+    facts.forEach(function(fact){
+      var body = fact.querySelector('.fact-body');
+      var head = fact.querySelector('.fact-head');
+      head.setAttribute('role','button');
+      head.setAttribute('tabindex','0');
+      head.setAttribute('aria-expanded','false');
+      function toggle(){
+        var isOpen = fact.classList.contains('is-open');
+        facts.forEach(function(f){
+          f.classList.remove('is-open');
+          f.querySelector('.fact-body').style.maxHeight = null;
+          f.querySelector('.fact-head').setAttribute('aria-expanded','false');
+        });
+        if(!isOpen){
+          fact.classList.add('is-open');
+          body.style.maxHeight = body.scrollHeight + 'px';
+          head.setAttribute('aria-expanded','true');
+        }
+      }
+      head.addEventListener('click', toggle);
+      head.addEventListener('keydown', function(e){
+        if(e.key === 'Enter' || e.key === ' '){ e.preventDefault(); toggle(); }
+      });
+    });
+  }
+
+  /* ================= CONCLUSION RECAP ================= */
+  function initConclusion(){
+    var el = document.getElementById('conclusion-recap');
+    var section = document.getElementById('scene-conclusion');
+    if(!el || !section) return;
+    var labels = ['Cambio', 'Derivada', 'Integral', 'Movimiento', 'F = ma', 'Órbita', 'Universo'];
+    function play(){
+      if(reducedMotion){ return; }
+      var i = 0;
+      function step(){
+        if(i >= labels.length){
+          if(gsapReady) gsap.to(el, {opacity:0, duration:0.4});
+          return;
+        }
+        el.textContent = labels[i];
+        if(gsapReady){
+          gsap.fromTo(el, {opacity:0}, {opacity:1, duration:0.28, onComplete:function(){
+            gsap.to(el, {opacity:0, duration:0.28, delay:0.32, onComplete: function(){ i++; step(); }});
+          }});
+        } else {
+          el.style.opacity = 1;
+          setTimeout(function(){ el.style.opacity = 0; i++; step(); }, 500);
+        }
+      }
+      step();
+    }
+    onceInView(section, play, 0.4);
+  }
+
+  /* ================= INIT ================= */
+  document.addEventListener('DOMContentLoaded', function(){
+    try{ initCursor(); }catch(e){}
+    try{ initNav(); }catch(e){}
+    try{ initGenericReveals(); }catch(e){}
+    try{ initTimeline(); }catch(e){}
+    try{ initWhoWords(); }catch(e){}
+    try{ initOrnament('who-canvas'); }catch(e){}
+    try{ initChangeScene(); }catch(e){}
+    try{ initDerivative(); }catch(e){}
+    try{ initIntegral(); }catch(e){}
+    try{ initSeries(); }catch(e){}
+    try{ initMovement(); }catch(e){}
+    try{ initFMA(); }catch(e){}
+    try{ initGravity(); }catch(e){}
+    try{ initUniverse(); }catch(e){}
+    try{ initCuriosities(); }catch(e){}
+    try{ initConclusion(); }catch(e){}
+
+    var hero;
+    try{ hero = initHero(); }catch(e){ hero = null; }
+
+    runLoadingSequence(function(){
+      if(hero) hero.play();
+    });
+  });
+
+  window.addEventListener('load', function(){
+    if(stReady) ScrollTrigger.refresh();
+  });
+
+})();
+</script>
+</body>
+</html>
